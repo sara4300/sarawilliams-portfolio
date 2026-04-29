@@ -1,0 +1,1857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CORA — Sara Williams</title>
+  <meta name="description" content="Case study: CORA — A smart compression sleeve and mobile app helping injured athletes navigate recovery with real-time data, care team connection, and mental health support. Indigo Design Award 2021.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:             #F9F7F2;
+      --text-primary:   #1C1C1A;
+      --text-secondary: #5A5855;
+      --text-muted:     #9A9690;
+      --accent:         #2B3A4A;
+      --accent-mid:     #3D5166;
+      --accent-light:   #E8EDF2;
+      --accent-line:    rgba(43, 58, 74, 0.12);
+      --card-bg:        rgba(255, 255, 255, 0.68);
+      --card-border:    rgba(43, 58, 74, 0.09);
+      --font-display:   'Playfair Display', Georgia, serif;
+      --font-body:      'DM Sans', 'Helvetica Neue', sans-serif;
+      --nav-h:          68px;
+      --max-w:          1200px;
+      --radius:         12px;
+      --shadow-sm:      0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
+      --shadow-md:      0 4px 18px rgba(43,58,74,0.09), 0 2px 6px rgba(43,58,74,0.04);
+      --shadow-lg:      0 14px 36px rgba(43,58,74,0.13), 0 4px 12px rgba(43,58,74,0.06);
+      --ease:           cubic-bezier(0.4, 0, 0.2, 1);
+      --t:              240ms;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg);
+      color: var(--text-primary);
+      font-size: 16px;
+      line-height: 1.65;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ===== MESH GRADIENT ===== */
+    .mesh-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+    .blob { position: absolute; border-radius: 50%; filter: blur(90px); }
+    .blob-1 { width: 640px; height: 640px; background: radial-gradient(circle, rgba(162,182,168,0.32) 0%, transparent 70%); top: -160px; right: -100px; }
+    .blob-2 { width: 520px; height: 520px; background: radial-gradient(circle, rgba(210,195,175,0.28) 0%, transparent 70%); bottom: 18%; left: -120px; }
+    .blob-3 { width: 420px; height: 420px; background: radial-gradient(circle, rgba(178,195,212,0.22) 0%, transparent 70%); top: 42%; right: 12%; }
+    .blob-4 { width: 360px; height: 360px; background: radial-gradient(circle, rgba(200,183,162,0.18) 0%, transparent 70%); bottom: -60px; right: 32%; }
+
+    .page { position: relative; z-index: 1; }
+    .container { max-width: var(--max-w); margin: 0 auto; padding: 0 40px; }
+
+    /* ===== SCROLL ANIMATIONS ===== */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+    .delay-1 { transition-delay: 0.08s; }
+    .delay-2 { transition-delay: 0.16s; }
+    .delay-3 { transition-delay: 0.24s; }
+    .delay-4 { transition-delay: 0.32s; }
+    @media (prefers-reduced-motion: reduce) {
+      .fade-in { opacity: 1; transform: none; transition: none; }
+    }
+
+    /* ===== TYPOGRAPHY ===== */
+    .section-label {
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+      opacity: 0.55;
+      margin-bottom: 14px;
+      display: block;
+    }
+    .section-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 3vw, 2.4rem);
+      font-weight: 600;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+    .section-title em { font-style: italic; font-weight: 400; color: var(--text-secondary); }
+    .prose p { font-family: var(--font-body); font-size: 1.02rem; line-height: 1.82; color: var(--text-secondary); }
+    .prose p + p { margin-top: 20px; }
+    .prose strong { font-weight: 500; color: var(--text-primary); }
+
+    /* ===== NAV ===== */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: var(--nav-h);
+      transition: background var(--t) var(--ease), border-color var(--t) var(--ease), box-shadow var(--t) var(--ease);
+    }
+    .nav.scrolled {
+      background: rgba(249,247,242,0.90);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--accent-line);
+      box-shadow: 0 1px 14px rgba(43,58,74,0.05);
+    }
+    .nav-inner {
+      max-width: var(--max-w); margin: 0 auto; padding: 0 40px;
+      height: 100%; display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; color: var(--text-primary); text-decoration: none; letter-spacing: -0.01em; }
+    .nav-links { display: flex; align-items: center; gap: 34px; list-style: none; }
+    .nav-links a { font-family: var(--font-body); font-size: 0.85rem; font-weight: 400; letter-spacing: 0.025em; color: var(--text-secondary); text-decoration: none; position: relative; transition: color var(--t) var(--ease); }
+    .nav-links a::after { content: ''; position: absolute; bottom: -3px; left: 0; right: 0; height: 1px; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform var(--t) var(--ease); }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; }
+    .nav-hamburger span { display: block; width: 22px; height: 1.5px; background: var(--text-primary); border-radius: 2px; transition: transform var(--t) var(--ease), opacity var(--t) var(--ease); }
+    .nav-hamburger[aria-expanded="true"] span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .nav-hamburger[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
+    .nav-hamburger[aria-expanded="true"] span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+    .nav-drawer { display: none; position: fixed; top: var(--nav-h); left: 0; right: 0; background: rgba(249,247,242,0.96); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--accent-line); padding: 28px 40px 36px; z-index: 99; }
+    .nav-drawer.open { display: block; }
+    .nav-drawer ul { list-style: none; display: flex; flex-direction: column; gap: 22px; }
+    .nav-drawer ul a { font-family: var(--font-body); font-size: 1.05rem; color: var(--text-secondary); text-decoration: none; transition: color var(--t); }
+    .nav-drawer ul a:hover { color: var(--accent); }
+
+    /* ===== UTILITIES ===== */
+    section { padding: 80px 0; }
+    .divider { height: 1px; background: var(--accent-line); }
+    .link-arrow { font-family: var(--font-body); font-size: 0.85rem; font-weight: 500; color: var(--accent); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; transition: gap var(--t) var(--ease); }
+    .link-arrow:hover { gap: 10px; }
+
+    /* ===== IMAGE PLACEHOLDER ===== */
+    .img-placeholder {
+      width: 100%;
+      background: linear-gradient(145deg, #EBE7DE 0%, #DDD8CC 60%, #D3CEC0 100%);
+      border: 1.5px dashed rgba(43, 58, 74, 0.18);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 40px 24px;
+    }
+    .img-placeholder svg { width: 36px; height: 36px; opacity: 0.3; }
+    .img-placeholder-label { font-family: var(--font-body); font-size: 0.7rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.55; }
+    .img-placeholder-hint { font-family: var(--font-display); font-size: 0.8rem; font-style: italic; opacity: 0.38; line-height: 1.5; }
+
+    /* ===== REAL IMAGES ===== */
+    .cs-img {
+      width: 100%;
+      border-radius: var(--radius);
+      display: block;
+      object-fit: cover;
+    }
+    .cs-img-full {
+      width: 100%;
+      border-radius: 16px;
+      display: block;
+    }
+    .cs-img-caption {
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 10px;
+      font-style: italic;
+    }
+
+    /* ===== BREADCRUMB ===== */
+    .breadcrumb { padding: calc(var(--nav-h) + 28px) 0 0; }
+    .breadcrumb-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-decoration: none;
+      letter-spacing: 0.02em;
+      transition: color var(--t) var(--ease), gap var(--t) var(--ease);
+    }
+    .breadcrumb-link:hover { color: var(--accent); gap: 11px; }
+
+    /* ===== CASE STUDY HERO ===== */
+    #cs-hero { padding-top: 28px; padding-bottom: 72px; }
+    .cs-header { max-width: 840px; margin-bottom: 52px; }
+    .cs-label {
+      font-family: var(--font-body);
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      opacity: 0.6;
+      margin-bottom: 20px;
+      display: block;
+    }
+    .cs-title {
+      font-family: var(--font-display);
+      font-size: clamp(2.6rem, 5.5vw, 4.2rem);
+      font-weight: 700;
+      line-height: 1.04;
+      letter-spacing: -0.025em;
+      color: var(--text-primary);
+      margin-bottom: 22px;
+    }
+    .cs-tagline {
+      font-family: var(--font-display);
+      font-size: clamp(1.05rem, 1.75vw, 1.3rem);
+      font-weight: 400;
+      font-style: italic;
+      line-height: 1.52;
+      color: var(--text-secondary);
+      margin-bottom: 26px;
+      max-width: 720px;
+    }
+    .cs-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .cs-tag {
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 5px 12px;
+      border-radius: 100px;
+    }
+    .hero-banner {
+      aspect-ratio: 21/9;
+      min-height: 480px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #1A1F2E;
+    }
+    .hero-banner img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+      object-position: center;
+      min-height: 320px;
+      max-height: 600px;
+    }
+
+    /* ===== PROJECT OVERVIEW ===== */
+    #overview { padding: 72px 0; }
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      border: 1px solid var(--accent-line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      margin-top: 36px;
+    }
+    .overview-item {
+      padding: 24px 28px;
+      border-bottom: 1px solid var(--accent-line);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .overview-item:nth-child(odd) { border-right: 1px solid var(--accent-line); }
+    .overview-item:nth-last-child(-n+2) { border-bottom: none; }
+    .overview-label {
+      font-family: var(--font-body);
+      font-size: 0.67rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      opacity: 0.6;
+    }
+    .overview-value {
+      font-family: var(--font-body);
+      font-size: 0.93rem;
+      color: var(--text-primary);
+      line-height: 1.55;
+    }
+
+    /* ===== IMPACT AT A GLANCE ===== */
+    #impact { padding: 80px 0; }
+    .impact-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-top: 44px;
+    }
+    .impact-stat {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 28px 26px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .impact-number {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 2.4vw, 2.1rem);
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1.1;
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+    .impact-desc {
+      font-family: var(--font-body);
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+
+    /* ===== PULL QUOTE ===== */
+    .pull-quote-block {
+      margin: 36px 0;
+      padding: 36px 48px;
+      background: var(--accent);
+      border-radius: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    .pull-quote-block::before {
+      content: '"';
+      position: absolute;
+      top: -36px; left: 24px;
+      font-family: var(--font-display);
+      font-size: 14rem;
+      color: rgba(255,255,255,0.05);
+      line-height: 1;
+      pointer-events: none;
+    }
+    .pull-quote-text {
+      font-family: var(--font-display);
+      font-size: clamp(1.15rem, 2.2vw, 1.55rem);
+      font-weight: 400;
+      font-style: italic;
+      line-height: 1.55;
+      color: rgba(255,255,255,0.92);
+      position: relative;
+      z-index: 1;
+      max-width: 780px;
+    }
+
+    /* ===== NUMBERED PROCESS ===== */
+    .process-intro {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.78;
+      max-width: 760px;
+      margin-top: 16px;
+      margin-bottom: 0;
+    }
+    .process-list {
+      list-style: none;
+      margin-top: 52px;
+      position: relative;
+    }
+    .process-list::before {
+      content: '';
+      position: absolute;
+      left: 31px;
+      top: 0; bottom: 0;
+      width: 1px;
+      background: var(--accent-line);
+    }
+    .process-item {
+      display: grid;
+      grid-template-columns: 62px 1fr;
+      gap: 28px;
+      padding-bottom: 60px;
+      position: relative;
+    }
+    .process-item:last-child { padding-bottom: 0; }
+    .process-num {
+      width: 62px; height: 62px;
+      flex-shrink: 0;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--accent);
+      position: relative;
+      z-index: 1;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .process-content { padding-top: 12px; }
+    .process-title {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+    .process-desc {
+      font-family: var(--font-body);
+      font-size: 0.93rem;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      margin-bottom: 24px;
+    }
+    .process-media { margin-top: 4px; }
+
+    /* ===== SIDE-BY-SIDE MEDIA ===== */
+    .media-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-top: 24px;
+    }
+    .media-pair img {
+      width: 100%;
+      border-radius: var(--radius);
+      display: block;
+    }
+
+    /* ===== BULLET LIST (feedback-style) ===== */
+    .bullet-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 24px;
+      max-width: 680px;
+    }
+    .bullet-list li {
+      font-family: var(--font-body);
+      font-size: 0.93rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      padding-left: 22px;
+      position: relative;
+    }
+    .bullet-list li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      opacity: 0.5;
+      font-size: 0.8rem;
+      top: 2px;
+    }
+
+    /* ===== RESPONSIBILITY LIST ===== */
+    .responsibility-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 28px;
+      max-width: 680px;
+    }
+    .responsibility-list li {
+      font-family: var(--font-body);
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      padding: 16px 20px 16px 48px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      position: relative;
+    }
+    .responsibility-list li::before {
+      content: '↗';
+      position: absolute;
+      left: 18px;
+      top: 17px;
+      color: var(--accent);
+      opacity: 0.4;
+      font-size: 0.85rem;
+    }
+
+    /* ===== SPRINT CALLOUT CARDS ===== */
+    .sprint-callouts {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-top: 28px;
+      margin-bottom: 36px;
+    }
+    .sprint-callout {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 24px 24px 24px 26px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .sprint-callout-label {
+      font-family: var(--font-body);
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--accent);
+      opacity: 0.6;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .sprint-callout p {
+      font-family: var(--font-body);
+      font-size: 0.93rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* ===== INTENDED OUTCOME LIST ===== */
+    .outcome-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-top: 28px;
+    }
+    .outcome-list li {
+      font-family: var(--font-body);
+      font-size: 0.93rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+      padding: 18px 20px 18px 46px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      position: relative;
+    }
+    .outcome-list li::before {
+      content: '✦';
+      position: absolute;
+      left: 18px;
+      top: 19px;
+      color: var(--accent);
+      opacity: 0.35;
+      font-size: 0.75rem;
+    }
+
+    /* ===== PROTO SECTIONS ===== */
+    .proto-section-label {
+      font-family: var(--font-body);
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      opacity: 0.6;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .proto-section-title {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    .proto-block {
+      margin-bottom: 64px;
+    }
+    .proto-block:last-child { margin-bottom: 0; }
+    .proto-desc {
+      font-family: var(--font-body);
+      font-size: 0.93rem;
+      color: var(--text-secondary);
+      line-height: 1.75;
+      max-width: 740px;
+      margin-bottom: 24px;
+    }
+
+    /* ===== FEATURE GRID (Final Solution 2×2) ===== */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-top: 36px;
+      margin-bottom: 48px;
+    }
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 28px 28px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .feature-icon {
+      font-size: 1.5rem;
+      line-height: 1;
+      margin-bottom: 14px;
+      display: block;
+    }
+    .feature-title {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      line-height: 1.25;
+    }
+    .feature-desc {
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* ===== FINAL SOLUTION IMAGES ===== */
+    .solution-images { margin-top: 12px; }
+    .solution-images + .solution-images { margin-top: 18px; }
+
+    /* ===== COLOR SWATCHES ===== */
+    .color-swatches {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 52px;
+      align-items: center;
+    }
+    .swatch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .swatch-chip {
+      width: 72px;
+      height: 72px;
+      border-radius: 10px;
+      border: 1px solid var(--accent-line);
+      box-shadow: var(--shadow-sm);
+    }
+    .swatch-hex {
+      font-family: var(--font-body);
+      font-size: 0.67rem;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      text-align: center;
+    }
+    .swatch-name {
+      font-family: var(--font-body);
+      font-size: 0.62rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: -4px;
+      opacity: 0.7;
+    }
+
+    /* ===== REFLECTION ===== */
+    .reflection-card-full {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 44px 48px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      margin-top: 36px;
+      max-width: 820px;
+    }
+    .reflection-card-full-label {
+      font-family: var(--font-body);
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      opacity: 0.6;
+      margin-bottom: 12px;
+      display: block;
+    }
+    .reflection-card-full-title {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 600;
+      line-height: 1.2;
+      letter-spacing: -0.015em;
+      color: var(--text-primary);
+      margin-bottom: 18px;
+    }
+    .reflection-card-full p {
+      font-family: var(--font-body);
+      font-size: 0.975rem;
+      color: var(--text-secondary);
+      line-height: 1.82;
+    }
+
+    /* ===== FOOTER / CONTACT ===== */
+    #contact { padding-bottom: 60px; }
+    .next-project-bar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: 52px;
+    }
+    .contact-block {
+      background: var(--accent);
+      border-radius: 20px;
+      padding: 72px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .contact-block::before {
+      content: '';
+      position: absolute;
+      width: 340px; height: 340px;
+      top: -80px; right: -60px;
+      background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 68%);
+      border-radius: 50%;
+    }
+    .contact-block::after {
+      content: '';
+      position: absolute;
+      width: 220px; height: 220px;
+      bottom: -50px; left: 12%;
+      background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 68%);
+      border-radius: 50%;
+    }
+    .contact-content { position: relative; z-index: 1; max-width: 620px; }
+    .contact-label { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 18px; display: block; }
+    .contact-heading { font-family: var(--font-display); font-size: clamp(2rem, 3.5vw, 2.9rem); font-weight: 600; line-height: 1.12; letter-spacing: -0.025em; color: #fff; margin-bottom: 18px; }
+    .contact-body { font-size: 0.975rem; line-height: 1.8; color: rgba(255,255,255,0.62); margin-bottom: 36px; }
+    .contact-links { display: flex; flex-wrap: wrap; align-items: center; gap: 20px; }
+    .contact-email { font-family: var(--font-body); font-size: 1rem; font-weight: 500; color: #fff; text-decoration: none; border-bottom: 1px solid rgba(255,255,255,0.28); padding-bottom: 2px; transition: border-color var(--t) var(--ease); }
+    .contact-email:hover { border-color: #fff; }
+    .contact-socials { display: flex; align-items: center; gap: 14px; }
+    .social-link { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; color: rgba(255,255,255,0.55); text-decoration: none; transition: color var(--t) var(--ease); }
+    .social-link:hover { color: #fff; }
+    .social-placeholder { font-size: 0.76rem; font-style: italic; color: rgba(255,255,255,0.28); padding: 5px 12px; border: 1px dashed rgba(255,255,255,0.18); border-radius: 100px; }
+    .footer-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding: 28px 0 6px; }
+    .footer-copy { font-size: 0.78rem; color: var(--text-muted); }
+    .footer-nav { display: flex; gap: 22px; list-style: none; }
+    .footer-nav a { font-size: 0.78rem; color: var(--text-muted); text-decoration: none; transition: color var(--t) var(--ease); }
+    .footer-nav a:hover { color: var(--accent); }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .impact-grid { grid-template-columns: repeat(2, 1fr); }
+      .feature-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      .container { padding: 0 22px; }
+      .nav-inner { padding: 0 22px; }
+      section { padding: 56px 0; }
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .nav-drawer { padding: 28px 22px 36px; }
+
+      .cs-title { font-size: 2.4rem; }
+
+      .overview-grid { grid-template-columns: 1fr; }
+      .overview-item:nth-child(odd) { border-right: none; }
+      .overview-item:nth-last-child(-n+2) { border-bottom: 1px solid var(--accent-line); }
+      .overview-item:last-child { border-bottom: none; }
+
+      .impact-grid { grid-template-columns: repeat(2, 1fr); }
+
+      .pull-quote-block { padding: 28px 28px; }
+
+      .process-list::before { left: 27px; }
+      .process-item { grid-template-columns: 54px 1fr; gap: 20px; }
+      .process-num { width: 54px; height: 54px; font-size: 0.88rem; }
+
+      .media-pair { grid-template-columns: 1fr; }
+
+      .sprint-callouts { grid-template-columns: 1fr; }
+
+      .outcome-list { grid-template-columns: 1fr; }
+
+      .feature-grid { grid-template-columns: 1fr; }
+
+      .reflection-card-full { padding: 32px 28px; }
+
+      .contact-block { padding: 48px 32px; }
+      .footer-bar { flex-direction: column; align-items: flex-start; }
+    }
+
+    @media (max-width: 480px) {
+      .impact-grid { grid-template-columns: 1fr; }
+      .contact-block { padding: 40px 22px; }
+      .color-swatches { gap: 10px; }
+      .swatch-chip { width: 52px; height: 52px; }
+    }
+
+    @media (max-width: 375px) {
+      .container { padding: 0 18px; }
+    }
+
+    /* ===== IMAGE SIZING FIXES ===== */
+    /* Mobile mockups — portrait, constrained height so they don't blow up */
+    .img-mobile {
+      width: 100%;
+      max-height: 520px;
+      object-fit: contain;
+      border-radius: var(--radius);
+      display: block;
+      background: transparent;
+    }
+    /* Side-by-side mobile mockup pairs */
+    .media-pair .img-mobile {
+      max-height: 480px;
+    }
+    /* Research / process slides — landscape, contained */
+    .img-research {
+      width: 100%;
+      max-height: 380px;
+      object-fit: contain;
+      border-radius: var(--radius);
+      display: block;
+      background: transparent;
+    }
+    /* Full-width product / banner images */
+    .img-product {
+      width: 100%;
+      max-height: 560px;
+      object-fit: contain;
+      border-radius: var(--radius);
+      display: block;
+      background: transparent;
+    }
+    /* Lo-fi sketches — smaller, hand-drawn feel */
+    .img-lofi {
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      border-radius: var(--radius);
+      display: block;
+      background: transparent;
+    }
+    /* Wrapper for centered, constrained single images */
+    .img-centered-wrap {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      width: 100%;
+    }
+    .img-centered-wrap img {
+      max-width: 720px;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ===== MESH GRADIENT ===== -->
+  <div class="mesh-bg" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="blob blob-4"></div>
+  </div>
+
+  <div class="page">
+
+    <!-- ===== NAVIGATION ===== -->
+    <nav class="nav" id="mainNav" aria-label="Main navigation">
+      <div class="nav-inner">
+        <a href="index.html" class="nav-logo">Sara Williams</a>
+        <ul class="nav-links" role="list">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="index.html#work">Work</a></li>
+          <li><a href="other-work.html">Other Work</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="index.html#contact">Contact</a></li>
+        </ul>
+        <button class="nav-hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- Mobile Drawer -->
+    <div class="nav-drawer" id="mobileDrawer" role="dialog" aria-label="Mobile navigation">
+      <ul role="list">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="index.html#work">Work</a></li>
+        <li><a href="other-work.html">Other Work</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="index.html#contact">Contact</a></li>
+      </ul>
+    </div>
+
+
+    <!-- ===== BREADCRUMB ===== -->
+    <div class="breadcrumb">
+      <div class="container">
+        <a href="index.html#work" class="breadcrumb-link">
+          <span aria-hidden="true">←</span>
+          Work
+        </a>
+      </div>
+    </div>
+
+
+    <!-- ===== HERO ===== -->
+    <section id="cs-hero" aria-label="Case study introduction">
+      <div class="container">
+
+        <div class="cs-header">
+          <span class="cs-label fade-in">Case Study 04</span>
+          <h1 class="cs-title fade-in delay-1">CORA</h1>
+          <p class="cs-tagline fade-in delay-2">Ratifying Your Recovery.</p>
+          <div class="cs-tags fade-in delay-3" aria-label="Project tags">
+            <span class="cs-tag">Interaction Design</span>
+            <span class="cs-tag">Prototyping</span>
+            <span class="cs-tag">Wearable Tech</span>
+            <span class="cs-tag">Award-Winning</span>
+          </div>
+        </div>
+
+        <div class="fade-in delay-4">
+          <div class="hero-banner">
+            <img
+              src="portfolio/assets-cora/cora-banner.png"
+              alt="CORA smart sleeve and mobile app — recovery system overview"
+              style="width:100%; height:100%; object-fit:cover; display:block;"
+              onerror="this.parentElement.innerHTML='<div class=\'img-placeholder\' style=\'aspect-ratio:21/8;\' role=\'img\' aria-label=\'Hero — CORA Smart Sleeve + App Overview\'><span class=\'img-placeholder-label\'>Hero Image</span></div>'"
+            >
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="divider container" aria-hidden="true"></div>
+
+
+    <!-- ===== PROJECT OVERVIEW ===== -->
+    <section id="overview" aria-label="Project overview">
+      <div class="container">
+        <span class="section-label fade-in">Project Overview</span>
+        <h2 class="section-title fade-in delay-1">At a <em>Glance</em></h2>
+
+        <div class="overview-grid fade-in delay-2">
+          <div class="overview-item">
+            <span class="overview-label">My Role</span>
+            <span class="overview-value">Interaction Lead</span>
+          </div>
+          <div class="overview-item">
+            <span class="overview-label">Type</span>
+            <span class="overview-value">Group Project (5 people)</span>
+          </div>
+          <div class="overview-item">
+            <span class="overview-label">Duration</span>
+            <span class="overview-value">10 Weeks</span>
+          </div>
+          <div class="overview-item">
+            <span class="overview-label">Recognition</span>
+            <span class="overview-value">Indigo Design Award 2021</span>
+          </div>
+          <div class="overview-item">
+            <span class="overview-label">Responsibilities</span>
+            <span class="overview-value">Prototyping · Vision Video · Interaction Design</span>
+          </div>
+          <div class="overview-item">
+            <span class="overview-label">Tools</span>
+            <span class="overview-value">Framer · Figma</span>
+          </div>
+          <div class="overview-item">
+            <span class="overview-label">Course</span>
+            <span class="overview-value">Perceptual &amp; Cognitive Human Factors</span>
+          </div>
+          <div class="overview-item">
+            <span class="overview-label">Target Users</span>
+            <span class="overview-value">Injured Athletes</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider container" aria-hidden="true"></div>
+
+
+    <!-- ===== IMPACT AT A GLANCE ===== -->
+    <section id="impact" aria-label="Impact statistics">
+      <div class="container">
+        <span class="section-label fade-in">Results</span>
+        <h2 class="section-title fade-in delay-1">Impact at a <em>Glance</em></h2>
+
+        <div class="impact-grid">
+          <div class="impact-stat fade-in delay-1">
+            <div class="impact-number">100+</div>
+            <p class="impact-desc">Survey responses collected from athletes across sport levels</p>
+          </div>
+          <div class="impact-stat fade-in delay-2">
+            <div class="impact-number">7</div>
+            <p class="impact-desc">Athlete interviews conducted — individual sessions with injured or recently recovered athletes</p>
+          </div>
+          <div class="impact-stat fade-in delay-3">
+            <div class="impact-number">4</div>
+            <p class="impact-desc">Expert physical therapist interviews to validate the clinical side of the solution</p>
+          </div>
+          <div class="impact-stat fade-in delay-4">
+            <div class="impact-number">&#127942;</div>
+            <p class="impact-desc">Indigo Design Award 2021 — recognizing design excellence in wearable health technology</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider container" aria-hidden="true"></div>
+
+
+    <!-- ===== SECTION 1: THE DESIGN CHALLENGE ===== -->
+    <section id="challenge" aria-label="The design challenge">
+      <div class="container">
+        <span class="section-label fade-in">Overview</span>
+        <h2 class="section-title fade-in delay-1">The Design <em>Challenge</em></h2>
+
+        <div class="prose fade-in delay-2" style="margin-top: 28px; max-width: 820px;">
+          <p>Our Human Factors course gave us two research articles exploring ten psychological human needs: Autonomy, Competence, Relatedness, Self-Actualization, Physical Thriving, Pleasure Stimulation, Money/Luxury, Security, Self-Esteem, and Popularity.</p>
+          <p>Our challenge was to design a product that meaningfully addresses these needs. Our team of five landed on a topic at the intersection of Physical Thriving and Competence — and an underserved user group: injured athletes.</p>
+        </div>
+
+        <div class="pull-quote-block fade-in">
+          <p class="pull-quote-text">
+            "Injured athletes get resources for their physical health, but their mental health is not usually considered. Getting injured takes a big toll on an athlete's mental health — and can even delay their physical recovery."
+          </p>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="divider container" aria-hidden="true"></div>
+
+
+    <!-- ===== SECTION 2: WHY THIS PROBLEM SPACE ===== -->
+    <section id="problem-space" aria-label="Why this problem space">
+      <div class="container">
+        <span class="section-label fade-in">Context</span>
+        <h2 class="section-title fade-in delay-1">Why This <em>Problem Space</em></h2>
+
+        <div class="prose fade-in delay-2" style="margin-top: 28px; max-width: 820px;">
+          <p>Physical Thriving is tied entirely to positive affect — staying active is a natural antidepressant. Competence is about successfully mastering challenges and feeling capable. An injury strips both at once: an athlete can no longer do what they're built to do, on an unknown timeline. Security collapses too — routines disappear, the return-to-play date is uncertain, and the athlete loses control over their own body.</p>
+          <p>Our secondary research sharpened this further. Athletes are often reluctant to reveal symptoms — they've been conditioned to push through pain, may see mental health support as weakness, and face cultural pressure to just "play through it." Physicians, meanwhile, tend to focus on physical outcomes and overlook psychological state — even though emotional recovery directly affects physical recovery.</p>
+        </div>
+
+        <div class="fade-in" style="margin-top: 40px;">
+          <div class="img-centered-wrap">
+            <img src="portfolio/assets-cora/cora-overview.jpg" alt="CORA system overview — smart sleeve and mobile app" class="img-product">
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="divider container" aria-hidden="true"></div>
+
+
+    <!-- ===== SECTION 3: MY ROLE ===== -->
+    <section id="my-role" aria-label="My role on the team">
+      <div class="container">
+        <span class="section-label fade-in">Team</span>
+        <h2 class="section-title fade-in delay-1">My Role — <em>Interaction Lead</em></h2>
+
+        <div class="prose fade-in delay-2" style="margin-top: 28px; max-width: 820px;">
+          <p>On a team of five — Savannah (Project Lead), Satchel (Product Lead), Taylor (Research Lead), Sullivan (Visual Lead), and me (Interaction Lead) — my ownership was the prototype and the experience of using it.</p>
+        </div>
+
+        <ul class="responsibility-list fade-in delay-3" aria-label="Interaction Lead responsibilities">
+          <li>Building and iterating all prototype fidelities — lo-fi through high-fi</li>
+          <li>Designing the interaction model: how the app flows, how the wearable connects, how real-time data surfaces in context</li>
+          <li>Producing the Vision Video — a cinematic walkthrough of the full product experience</li>
+          <li>Ensuring every screen reflected our human factors framework: Physical Thriving and Competence embedded in the UX</li>
+        </ul>
+
+      </div>
+    </section>
+
+    <div class="divider container" aria-hidden="true"></div>
+
+
+    <!-- ===== SECTION 4: RESEARCH ===== -->
+    <section id="research" aria-label="Research process">
+      <div class="container">
+        <span class="section-label fade-in">Discovery</span>
+        <h2 class="section-title fade-in delay-1">Research <em>Process</em></h2>
+        <p class="process-intro fade-in delay-2">We ran a substantial primary research effort — 100+ survey responses, 7 individual athlete interviews, a group interview with 4 athletes, and 4 expert interviews with physical therapists.</p>
+
+        <ol class="process-list fade-in delay-2" aria-label="Four-step research process">
+
+          <!-- Step 01 -->
+          <li class="process-item">
+            <div class="process-num" aria-hidden="true">01</div>
+            <div class="process-content">
+              <h3 class="process-title">Secondary Research</h3>
+              <p class="process-desc">Two clear themes shaped the entire project direction. First, fear of vulnerability: athletes are afraid to reveal symptoms, seeking counseling is often seen as weakness, and athletes are conditioned to work through pain. Second, physician oversight: doctors tend to focus purely on physical outcomes, even though psychological state — including fear and lack of confidence — directly affects return to play.</p>
+              <div class="process-media">
+                <div class="media-pair">
+                  <img
+                    src="portfolio/assets-cora/secondary-reserach-sports-injury.jpg"
+                    alt="Secondary research — sports injury and athlete vulnerability"
+                    style="width:100%; border-radius:var(--radius); display:block; object-fit:contain; max-height:400px;"
+                  >
+                  <img
+                    src="portfolio/assets-cora/secondary-reserach-sports-depressed.jpg"
+                    alt="Secondary research — depression and mental health in injured athletes"
+                    style="width:100%; border-radius:var(--radius); display:block; object-fit:contain; max-height:400px;"
+                  >
+                </div>
+              </div>
+            </div>
+          </li>
+
+          <!-- Step 02 -->
+          <li class="process-item">
+            <div class="process-num" aria-hidden="true">02</div>
+            <div class="process-content">
+              <h3 class="process-title">Survey Results</h3>
+              <p class="process-desc">Our 100+ response survey quantified the patterns our secondary research surfaced. 52.5% of athletes said they've been told to play through an injury. 64.6% said they are not scared to reveal an injury — though qualitative context suggested this varied significantly by sport and team culture.</p>
+              <div class="process-media">
+                <div class="media-pair">
+                  <img src="portfolio/assets-cora/affinitization-sticky-1.png" alt="Survey results — play through injury chart" class="img-research">
+                  <img src="portfolio/assets-cora/affinitization-sticky-2.png" alt="Survey results — fear of revealing injury chart" class="img-research">
+                </div>
+              </div>
+            </div>
+          </li>
+
+          <!-- Step 03 -->
+          <li class="process-item">
+            <div class="process-num" aria-hidden="true">03</div>
+            <div class="process-content">
+              <h3 class="process-title">How Topic Relates to Human Needs</h3>
+              <p class="process-desc">The research directly mapped to our three focal human needs. <strong>Physical Thriving</strong> — staying active is a natural antidepressant; injury removes this entirely. <strong>Competence</strong> — injuries hinder the athlete's ability to perform their sport for an unknown period, directly damaging their sense of capability. <strong>Security</strong> — injuries are unpredictable, removing routine and structure from the athlete's life.</p>
+              <div class="process-media">
+                <img
+                  src="portfolio/assets-cora/human-needs-physical-thriving.jpg"
+                  alt="How the project maps to human needs — Physical Thriving, Competence, Security"
+                  style="width:100%; border-radius:var(--radius); display:block; object-fit:contain; max-height:460px;"
+                >
+              </div>
+            </div>
+          </li>
+
+          <!-- Step 04 -->
+          <li class="process-item">
+            <div class="process-num" aria-hidden="true">04</div>
+            <div class="process-content">
+              <h3 class="process-title">Expert Interviews — Physical Therapists</h3>
+              <p class="process-desc">We interviewed 2 practicing PTs to understand the clinical side and validate our solution direction.</p>
+              <ul class="bullet-list" style="margin-top: 0; margin-bottom: 28px;">
+                <li>PTs want better visibility into how athletes are doing between sessions</li>
+                <li>Muscle activation data during at-home exercises would be genuinely useful — PTs currently have no way to know if exercises are being done correctly</li>
+                <li>Athletes re-aggravating injuries from incorrect form is a real and common problem</li>
+                <li>Post-PT survey feedback loops would help PTs adjust plans more responsively</li>
+              </ul>
+              <div class="process-media">
+                <div style="margin-top: 8px;">
+                  <img
+                    src="portfolio/assets-cora/expert-interview-pt.jpg"
+                    alt="Expert interview with physical therapist — PT validation session"
+                    style="width:100%; border-radius:var(--radius); display:block; object-fit:contain; max-height:500px;"
+                  >
+                </div>
+              </div>
+            </div>
+          </li>
+
+        </ol>
+      </div>
+    </section>
+
+    <div class="divider container" aria-hidden="true"></div>
+
+
+    <!-- ===== SECTION 5: IDEATION — SPRINT WEEK ===== -->
+    <section id="ideation" aria-label="Ideation and sprint week">
+      <div class="container">
+        <span class="section-label fade-in">Design Thinking</span>
+        <h2 class="section-title fade-in delay-1">Ideation — <em>Sprint Week</em></h2>
+
+        <div class="prose fade-in delay-2" style="margin-top: 28px; max-width: 820px;">
+          <p>Sprint week was a structured rapid ideation phase where we explored concepts broadly before committing to a direction. Two critical failure scenarios shaped the final concept.</p>
+        </div>
+
+        <div class="sprint-callouts fade-in delay-3">
+          <div class="sprint-callout">
+            <span class="sprint-callout-label">Failure Scenario 01</span>
+            <p>An athlete re-aggravates their injury because they performed an exercise incorrectly at home — no one was there to correct them.</p>
+          </div>
+          <div class="sprint-callout">
+            <span class="sprint-callout-label">Failure Scenario 02</span>
+            <p>An athlete skips exercises entirely because they don't feel accountable to anyone outside formal PT sessions.</p>
+          </div>
+        </div>
+
+        <div class="prose fade-in" style="max-width: 820px; margin-bottom: 36px;">
+          <p>These scenarios pointed toward a product that does two things at once: provides real-time physical guidance during exercise, and maintains a human connection to the care team. That's where the smart sleeve concept emerged.</p>
+        </div>
+
+        <div class="fade-in" style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 48px;">
+          <img
+            src="portfolio/assets-cora/sprint-week.png"
+            alt="Sprint week — ideation and storyboarding session"
+            style="width:100%; border-radius:var(--radius); display:block; object-fit:contain; max-height:440px;"
+          >
+          <img
+            src="portfolio/assets-cora/sprint-week-ideas.png"
+            alt="Sprint week — concept ideas and sketches"
+            style="width:100%; border-radius:var(--radius); display:block; object-fit:contain; max-height:440px;"
+          >
+        </div>
+
+        <div class="fade-in">
+          <span class="section-label" style="margin-bottom: 10px;">Intended Outcome &amp; Impact</span>
+          <p style="font-family: var(--font-body); font-size: 0.95rem; color: var(--text-secondary); line-height: 1.72; max-width: 720px; margin-bottom: 24px;">Before building anything, we aligned on what CORA should make athletes feel.</p>
+          <ul class="outcome-list" aria-label="Intended outcomes">
+            <li>Feel more in control of their recovery</li>
+            <li>Feel empowered in their physical therapy process</li>
+            <li>Find comfort in reaching out for mental or physical help</li>
+            <li>Trust the process — and trust themselves, their coach, and their PT</li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="divider container" aria-hidden="true"></div>
+
+
+    <!-- ===== SECTION 6: PROTOTYPING & TESTING ===== -->
+    <section id="prototyping" aria-label="Prototyping and testing">
+      <div class="container">
+        <span class="section-label fade-in">Craft</span>
+        <h2 class="section-title fade-in delay-1">Prototyping &amp; Testing — <em>Three Fidelities, Two Test Rounds</em></h2>
+        <p class="process-intro fade-in delay-2" style="margin-top: 20px; margin-bottom: 52px;">As Interaction Lead, prototyping was my core responsibility. We moved through three fidelities — lo-fi, mid-fi, and high-fi — with user testing at the mid-fi and high-fi stages. Each round directly shaped the next iteration.</p>
+
+        <!-- Lo-Fi -->
+        <div class="proto-block fade-in">
+          <span class="proto-section-label">Fidelity 01</span>
+          <h3 class="proto-section-title">Lo-Fi — Establishing the Structure</h3>
+          <p class="proto-desc">Lo-fi sketches were used internally to align the team on information architecture and core flows before building anything in Framer. Key structural decisions: a bottom nav with three tabs (Home, Physical, Mental), color-coded care team members, and a daily task system driven by the PT's assigned plan.</p>
+          <div class="media-pair">
+            <img
+              src="portfolio/assets-cora/lo-fi-home.png"
+              alt="Lo-fi sketches — Home Screen"
+              class="img-lofi"
+            >
+            <img
+              src="portfolio/assets-cora/lo-fi-exercise.png"
+              alt="Lo-fi sketches — Physical tab / exercise view"
+              class="img-lofi"
+            >
+          </div>
+        </div>
+
+        <!-- Mid-Fi -->
+        <div class="proto-block fade-in">
+          <span class="proto-section-label">Fidelity 02</span>
+          <h3 class="proto-section-title">Mid-Fi Prototype — First External Test</h3>
+          <p class="proto-desc">The mid-fi was built in Framer and tested with athletes. Key feedback:</p>
+          <ul class="bullet-list" style="margin-top: 0; margin-bottom: 28px;">
+            <li>Information architecture and navigation needed improvement — users struggled to orient themselves</li>
+            <li>The live exercise screen needed clearer visual hierarchy — muscle activation data was present but not scannable mid-exercise</li>
+            <li>Athletes wanted more direct messaging access — the care team felt distant</li>
+            <li>The mental health tab felt underbuilt compared to the physical tab</li>
+          </ul>
+          <div class="fade-in" style="margin-bottom: 18px;">
+            <img
+              src="portfolio/assets-cora/mid-fi-screens-combined.png"
+              alt="Mid-fi prototype — combined screens showing home, physical, and mental tabs"
+              style="width:100%; border-radius:var(--radius); display:block; object-fit:contain; max-height:560px;"
+            >
+          </div>
+        </div>
+
+        <!-- High-Fi -->
+        <div class="proto-block fade-in">
+          <span class="proto-section-label">Fidelity 03</span>
+          <h3 class="proto-section-title">High-Fi — Expert Testing &amp; Final Iteration</h3>
+          <p class="proto-desc">The high-fi addressed every mid-fi pain point. Navigation was restructured. The exercise experience was redesigned around the live muscle activation feed with a real-time rep counter and pain scale. The mental tab received a daily survey, goal gradient visualizations, and a resource toolbox.</p>
+          <p class="proto-desc">Expert PT testing confirmed the direction:</p>
+          <ul class="bullet-list" style="margin-top: 0; margin-bottom: 28px;">
+            <li>Much improved information architecture and navigation</li>
+            <li>"Something that PTs need today" — direct quote from a testing session</li>
+            <li>Loved the data visualizations in the physical tab</li>
+            <li>Flagged smart sleeve cost as a potential barrier to adoption</li>
+            <li>Requested data visualization added to the mental health page — incorporated in the final build</li>
+          </ul>
+          <div class="fade-in">
+            <img
+              src="portfolio/assets-cora/hi-fi-screens-combined.png"
+              alt="High-fi screens — combined view showing final interaction design across all tabs"
+              style="width:100%; border-radius:var(--radius); display:block; object-fit:contain; max-height:600px;"
+            >
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="divider container" aria-hidden="true"></div>
+
+
+    <!-- ===== SECTION 7: FINAL SOLUTION ===== -->
+    <section id="solution" aria-label="Final solution">
+      <div class="container">
+        <span class="section-label fade-in">The Product</span>
+        <h2 class="section-title fade-in delay-1">Final Solution — <em>The Complete System</em></h2>
+        <div class="prose fade-in delay-2" style="margin-top: 28px; max-width: 820px;">
+          <p>The final CORA system is two products working together: the smart compression sleeve that captures real-time muscle activation data, and the mobile app that surfaces that data to the athlete and their care team.</p>
+        </div>
+
+        <div class="feature-grid fade-in delay-3">
+          <div class="feature-card">
+            <span class="feature-icon" aria-hidden="true">🏠</span>
+            <h3 class="feature-title">Home Tab</h3>
+            <p class="feature-desc">Color-coded care team calendar (PT = green, Sports Psych = blue, Coach = yellow). Daily task list. Schedule in-person or virtual appointments. Track recovery stage and goals set by PT.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feature-icon" aria-hidden="true">💬</span>
+            <h3 class="feature-title">Messages</h3>
+            <p class="feature-desc">Direct messaging with PT, Sports Psychologist, and Coach at any time. Care team is always one tap away — reducing the isolation that comes with solo at-home recovery.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feature-icon" aria-hidden="true">💪</span>
+            <h3 class="feature-title">Physical Tab</h3>
+            <p class="feature-desc">Live muscle activation feed and rep counter from the CORA sleeve during exercises. PT-assigned exercise library. Pain scale feedback loop. Muscle heat map showing individual muscle progress toward recovery goals.</p>
+          </div>
+          <div class="feature-card">
+            <span class="feature-icon" aria-hidden="true">🧠</span>
+            <h3 class="feature-title">Mental Health Tab</h3>
+            <p class="feature-desc">Daily mental check-in survey with data visualization over time. Mental resource toolbox. Goal gradient tracking for mental milestones. Integrated pain scale and trend visualization.</p>
+          </div>
+        </div>
+
+        <!-- Final App — Home Screen (full width) -->
+        <div class="fade-in" style="margin-bottom: 18px;">
+          <img
+            src="portfolio/assets-cora/hi-fi-home-with-description.png"
+            alt="Final App — Home Screen with care team calendar and daily task list"
+            class="img-mobile"
+          >
+        </div>
+
+        <!-- Physical Tab + Muscle Heat Map (side-by-side) -->
+        <div class="media-pair fade-in" style="margin-bottom: 18px;">
+          <img
+            src="portfolio/assets-cora/hi-fi-during-workout.png"
+            alt="Final App — Physical Tab (live exercise with muscle activation)"
+            class="img-mobile"
+          >
+          <img
+            src="portfolio/assets-cora/hi-fi-exercise-data.png"
+            alt="Final App — Muscle heat map and exercise data visualization"
+            class="img-mobile"
+          >
+        </div>
+
+        <!-- Mental Health Tab + Messages (side-by-side) -->
+        <div class="media-pair fade-in" style="margin-bottom: 18px;">
+          <img
+            src="portfolio/assets-cora/hi-fi-mental-health.png"
+            alt="Final App — Mental Health Tab with daily survey and goal gradient"
+            class="img-mobile"
+          >
+          <img
+            src="portfolio/assets-cora/hi-fi-home-with-trainer.png"
+            alt="Final App — Messages and care team connection"
+            class="img-mobile"
+          >
+        </div>
+
+        <!-- CORA Smart Sleeve Final -->
+        <div class="fade-in" style="margin-bottom: 18px;">
+          <img
+            src="portfolio/assets-cora/final-cora-sleeve.png"
+            alt="CORA smart compression sleeve — final physical product"
+            style="width:100%; border-radius:16px; display:block; object-fit:contain; max-height:600px;"
+          >
+          <p class="cs-img-caption">CORA Smart Sleeve — final physical product</p>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="divider container" aria-hidden="true"></div>
+
+
+    <!-- ===== SECTION 8: VISION VIDEO ===== -->
+    <section id="vision-video" aria-label="Vision video">
+      <div class="container">
+        <span class="section-label fade-in">Deliverable</span>
+        <h2 class="section-title fade-in delay-1">Vision <em>Video</em></h2>
+
+        <div class="prose fade-in delay-2" style="margin-top: 28px; max-width: 820px;">
+          <p>As Interaction Lead, producing the Vision Video was one of my key final deliverables. The video was a narrative walkthrough of a real athlete's day — waking up, checking their schedule, completing their first exercise of the week with CORA tracking their form in real time, logging their mental check-in.</p>
+          <p>The goal was to show judges and stakeholders what CORA felt like in practice — not just what it looked like on screen. This was a design communication artifact as much as a product demo.</p>
+        </div>
+
+        <div class="fade-in" style="margin-top: 36px;">
+          <a
+            href="https://youtu.be/V0dQ7j638DE"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Watch the CORA Vision Video on YouTube"
+            style="display:block; position:relative; border-radius:var(--radius); overflow:hidden; cursor:pointer; max-width:900px; margin:0 auto;"
+          >
+            <img
+              src="https://img.youtube.com/vi/V0dQ7j638DE/maxresdefault.jpg"
+              alt="CORA Vision Video — watch on YouTube"
+              style="width:100%; display:block; border-radius:var(--radius);"
+            >
+            <!-- Play button overlay -->
+            <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.28); transition:background 0.22s ease;">
+              <div style="width:72px; height:72px; border-radius:50%; background:rgba(255,255,255,0.92); display:flex; align-items:center; justify-content:center; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+                <div style="width:0; height:0; border-top:14px solid transparent; border-bottom:14px solid transparent; border-left:22px solid #1C1C1A; margin-left:5px;"></div>
+              </div>
+            </div>
+          </a>
+          <p style="font-family:var(--font-body); font-size:0.8rem; color:var(--text-muted); text-align:center; margin-top:12px; font-style:italic;">CORA Vision Video — watch on YouTube ↗</p>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="divider container" aria-hidden="true"></div>
+
+
+    <!-- ===== SECTION 9: VISUAL DESIGN ===== -->
+    <section id="visual-design" aria-label="Visual design">
+      <div class="container">
+        <span class="section-label fade-in">Aesthetics</span>
+        <h2 class="section-title fade-in delay-1">Visual <em>Design</em></h2>
+
+        <div class="prose fade-in delay-2" style="margin-top: 28px; max-width: 820px; margin-bottom: 36px;">
+          <p>Sullivan led the visual design. The dark color system — deep navy backgrounds with bright purple accents — was intentional: it evokes the high-performance world of athletics while feeling premium and trustworthy, not sterile or clinical. Color was used functionally too: each care team member has an assigned color in the calendar and throughout the app, making the multi-provider system immediately scannable.</p>
+        </div>
+
+        <div class="color-swatches fade-in delay-3" aria-label="CORA color palette">
+          <div class="swatch">
+            <div class="swatch-chip" style="background: #1A1F2E;" aria-label="Deep Navy #1A1F2E"></div>
+            <span class="swatch-hex">#1A1F2E</span>
+            <span class="swatch-name">Deep Navy</span>
+          </div>
+          <div class="swatch">
+            <div class="swatch-chip" style="background: #7C5CFC;" aria-label="CORA Purple #7C5CFC"></div>
+            <span class="swatch-hex">#7C5CFC</span>
+            <span class="swatch-name">CORA Purple</span>
+          </div>
+          <div class="swatch">
+            <div class="swatch-chip" style="background: #A98FFB;" aria-label="Purple Mid #A98FFB"></div>
+            <span class="swatch-hex">#A98FFB</span>
+            <span class="swatch-name">Purple Mid</span>
+          </div>
+          <div class="swatch">
+            <div class="swatch-chip" style="background: #FFFFFF; border: 1px solid rgba(43,58,74,0.2);" aria-label="White #FFFFFF"></div>
+            <span class="swatch-hex">#FFFFFF</span>
+            <span class="swatch-name">White</span>
+          </div>
+          <div class="swatch">
+            <div class="swatch-chip" style="background: #0D0F16;" aria-label="Dark Ink #0D0F16"></div>
+            <span class="swatch-hex">#0D0F16</span>
+            <span class="swatch-name">Dark Ink</span>
+          </div>
+        </div>
+
+        <div class="fade-in" style="margin-top: 0;">
+          <img
+            src="portfolio/assets-cora/hi-fi-screens-combined.png"
+            alt="CORA visual design — high-fidelity app screens across all tabs"
+            style="
+              width: 100%;
+              display: block;
+              border-radius: 16px;
+              object-fit: contain;
+              max-height: 640px;
+              background: transparent;
+            "
+          >
+        </div>
+
+      </div>
+    </section>
+
+    <div class="divider container" aria-hidden="true"></div>
+
+
+    <!-- ===== SECTION 10: REFLECTION ===== -->
+    <section id="reflection" aria-label="Reflection">
+      <div class="container">
+        <span class="section-label fade-in">Looking Back</span>
+        <h2 class="section-title fade-in delay-1">What I <em>Learned</em></h2>
+
+        <div class="reflection-card-full fade-in delay-2">
+          <span class="reflection-card-full-label">Reflection</span>
+          <h3 class="reflection-card-full-title">This One Was Personal</h3>
+          <p>I was a student athlete who had to step away from a sport I loved because of injuries. I know exactly what it feels like to lose the physical and mental structure that sport gives you — and to navigate recovery alone, without visibility into your own progress or connection to your care team.</p>
+          <p style="margin-top: 18px;">That personal connection made this project feel like more than a class assignment. It made every design decision matter more. When we tested with athletes and heard them say "I wish I had this when I was injured" — that was the real win.</p>
+          <p style="margin-top: 18px;">From a craft perspective, CORA pushed me significantly as an interaction designer. Leading the prototype from lo-fi concept sketches through to a polished Framer high-fi — and then translating that into a Vision Video — required me to think about experience design at multiple levels simultaneously: information architecture, micro-interactions, real-time data visualization, and narrative storytelling.</p>
+          <p style="margin-top: 18px;">Winning the Indigo Design Award confirmed what the expert PT testing had already told us: the problem was real, the solution was grounded, and the execution was strong.</p>
+        </div>
+
+        <!-- Award mockup -->
+        <div class="fade-in" style="margin-top: 48px;">
+          <div style="
+            background: linear-gradient(135deg, #1A1F2E 0%, #0D0F16 100%);
+            border-radius: 20px;
+            padding: 52px 56px;
+            position: relative;
+            overflow: hidden;
+            max-width: 820px;
+          ">
+            <!-- decorative purple glow -->
+            <div style="
+              position: absolute;
+              width: 360px; height: 360px;
+              top: -120px; right: -80px;
+              background: radial-gradient(circle, rgba(124,92,252,0.18) 0%, transparent 70%);
+              border-radius: 50%;
+              pointer-events: none;
+            "></div>
+            <div style="
+              position: absolute;
+              width: 240px; height: 240px;
+              bottom: -60px; left: 10%;
+              background: radial-gradient(circle, rgba(124,92,252,0.10) 0%, transparent 70%);
+              border-radius: 50%;
+              pointer-events: none;
+            "></div>
+
+            <!-- Header -->
+            <div style="position: relative; z-index: 1; margin-bottom: 36px;">
+              <p style="
+                font-family: var(--font-body);
+                font-size: 0.68rem;
+                font-weight: 500;
+                letter-spacing: 0.18em;
+                text-transform: uppercase;
+                color: rgba(169,143,251,0.7);
+                margin-bottom: 10px;
+              ">Recognition</p>
+              <a
+                href="https://indigoaward.com/winners/3400"
+                target="_blank"
+                rel="noopener noreferrer"
+                style="
+                  font-family: var(--font-display);
+                  font-size: clamp(1.5rem, 2.8vw, 2.1rem);
+                  font-weight: 700;
+                  color: #ffffff;
+                  text-decoration: none;
+                  letter-spacing: -0.02em;
+                  line-height: 1.15;
+                  display: inline-flex;
+                  align-items: center;
+                  gap: 10px;
+                  transition: color 200ms ease;
+                "
+                onmouseover="this.style.color='#A98FFB'"
+                onmouseout="this.style.color='#ffffff'"
+              >
+                Indigo Design Awards 2021
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.6; flex-shrink:0;">
+                  <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </a>
+              <p style="
+                font-family: var(--font-body);
+                font-size: 0.9rem;
+                color: rgba(255,255,255,0.42);
+                margin-top: 8px;
+              ">CORA — Wearable Recovery System · 8 Awards</p>
+            </div>
+
+            <!-- Award list -->
+            <div style="position: relative; z-index: 1; display: flex; flex-direction: column; gap: 12px;">
+
+              <!-- Gold -->
+              <div style="display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px;">
+                <div style="
+                  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+                  background: linear-gradient(135deg, #F5C842, #E6A800);
+                  display: flex; align-items: center; justify-content: center;
+                  box-shadow: 0 0 16px rgba(245,200,66,0.35);
+                ">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" fill="rgba(255,255,255,0.9)"/>
+                  </svg>
+                </div>
+                <div>
+                  <p style="font-family:var(--font-body); font-size:0.72rem; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:rgba(245,200,66,0.8); margin-bottom:3px;">Gold</p>
+                  <p style="font-family:var(--font-body); font-size:0.92rem; color:rgba(255,255,255,0.88); line-height:1.4;">Interaction Design <span style="color:rgba(255,255,255,0.38);">· Graphic Design</span></p>
+                </div>
+              </div>
+
+              <!-- Silver row 1 -->
+              <div style="display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px;">
+                <div style="
+                  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+                  background: linear-gradient(135deg, #D4D4D4, #A0A0A0);
+                  display: flex; align-items: center; justify-content: center;
+                  box-shadow: 0 0 14px rgba(180,180,180,0.25);
+                ">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" fill="rgba(255,255,255,0.9)"/>
+                  </svg>
+                </div>
+                <div>
+                  <p style="font-family:var(--font-body); font-size:0.72rem; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:rgba(200,200,200,0.75); margin-bottom:3px;">Silver</p>
+                  <p style="font-family:var(--font-body); font-size:0.92rem; color:rgba(255,255,255,0.88); line-height:1.4;">Mobile App</p>
+                </div>
+              </div>
+
+              <!-- Silver row 2 -->
+              <div style="display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px;">
+                <div style="
+                  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+                  background: linear-gradient(135deg, #D4D4D4, #A0A0A0);
+                  display: flex; align-items: center; justify-content: center;
+                  box-shadow: 0 0 14px rgba(180,180,180,0.25);
+                ">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" fill="rgba(255,255,255,0.9)"/>
+                  </svg>
+                </div>
+                <div>
+                  <p style="font-family:var(--font-body); font-size:0.72rem; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:rgba(200,200,200,0.75); margin-bottom:3px;">Silver</p>
+                  <p style="font-family:var(--font-body); font-size:0.92rem; color:rgba(255,255,255,0.88); line-height:1.4;">UX, Interface &amp; Navigation</p>
+                </div>
+              </div>
+
+              <!-- Silver row 3 -->
+              <div style="display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px;">
+                <div style="
+                  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+                  background: linear-gradient(135deg, #D4D4D4, #A0A0A0);
+                  display: flex; align-items: center; justify-content: center;
+                  box-shadow: 0 0 14px rgba(180,180,180,0.25);
+                ">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" fill="rgba(255,255,255,0.9)"/>
+                  </svg>
+                </div>
+                <div>
+                  <p style="font-family:var(--font-body); font-size:0.72rem; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:rgba(200,200,200,0.75); margin-bottom:3px;">Silver</p>
+                  <p style="font-family:var(--font-body); font-size:0.92rem; color:rgba(255,255,255,0.88); line-height:1.4;">Interactive Design <span style="color:rgba(255,255,255,0.38);">· Digital Design</span></p>
+                </div>
+              </div>
+
+              <!-- Silver row 4 -->
+              <div style="display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px;">
+                <div style="
+                  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+                  background: linear-gradient(135deg, #D4D4D4, #A0A0A0);
+                  display: flex; align-items: center; justify-content: center;
+                  box-shadow: 0 0 14px rgba(180,180,180,0.25);
+                ">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" fill="rgba(255,255,255,0.9)"/>
+                  </svg>
+                </div>
+                <div>
+                  <p style="font-family:var(--font-body); font-size:0.72rem; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:rgba(200,200,200,0.75); margin-bottom:3px;">Silver</p>
+                  <p style="font-family:var(--font-body); font-size:0.92rem; color:rgba(255,255,255,0.88); line-height:1.4;">UX, Interface &amp; Navigation <span style="color:rgba(255,255,255,0.38);">· Digital Design</span></p>
+                </div>
+              </div>
+
+              <!-- Bronze row 1 -->
+              <div style="display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px;">
+                <div style="
+                  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+                  background: linear-gradient(135deg, #CD8B5A, #A0632E);
+                  display: flex; align-items: center; justify-content: center;
+                  box-shadow: 0 0 14px rgba(180,110,60,0.25);
+                ">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" fill="rgba(255,255,255,0.9)"/>
+                  </svg>
+                </div>
+                <div>
+                  <p style="font-family:var(--font-body); font-size:0.72rem; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:rgba(205,139,90,0.8); margin-bottom:3px;">Bronze</p>
+                  <p style="font-family:var(--font-body); font-size:0.92rem; color:rgba(255,255,255,0.88); line-height:1.4;">Branding <span style="color:rgba(255,255,255,0.38);">· Graphic Design</span></p>
+                </div>
+              </div>
+
+              <!-- Bronze row 2 -->
+              <div style="display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px;">
+                <div style="
+                  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+                  background: linear-gradient(135deg, #CD8B5A, #A0632E);
+                  display: flex; align-items: center; justify-content: center;
+                  box-shadow: 0 0 14px rgba(180,110,60,0.25);
+                ">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" fill="rgba(255,255,255,0.9)"/>
+                  </svg>
+                </div>
+                <div>
+                  <p style="font-family:var(--font-body); font-size:0.72rem; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:rgba(205,139,90,0.8); margin-bottom:3px;">Bronze</p>
+                  <p style="font-family:var(--font-body); font-size:0.92rem; color:rgba(255,255,255,0.88); line-height:1.4;">Integrated Graphic Design <span style="color:rgba(255,255,255,0.38);">· Graphic Design</span></p>
+                </div>
+              </div>
+
+              <!-- Bronze row 3 -->
+              <div style="display: flex; align-items: center; gap: 16px; padding: 16px 20px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 12px;">
+                <div style="
+                  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+                  background: linear-gradient(135deg, #CD8B5A, #A0632E);
+                  display: flex; align-items: center; justify-content: center;
+                  box-shadow: 0 0 14px rgba(180,110,60,0.25);
+                ">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6L12 2z" fill="rgba(255,255,255,0.9)"/>
+                  </svg>
+                </div>
+                <div>
+                  <p style="font-family:var(--font-body); font-size:0.72rem; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:rgba(205,139,90,0.8); margin-bottom:3px;">Bronze</p>
+                  <p style="font-family:var(--font-body); font-size:0.92rem; color:rgba(255,255,255,0.88); line-height:1.4;">Digital Design <span style="color:rgba(255,255,255,0.38);">· Graphic Design</span></p>
+                </div>
+              </div>
+
+            </div><!-- end award list -->
+          </div><!-- end award card -->
+        </div><!-- end fade-in wrapper -->
+
+      </div>
+    </section>
+
+
+    <!-- ===== FOOTER / CONTACT ===== -->
+    <section id="contact" aria-label="Contact and next project">
+      <div class="container">
+
+        <div class="next-project-bar fade-in">
+          <a href="solace.html" class="link-arrow">Next: Solace →</a>
+        </div>
+
+        <div class="contact-block fade-in">
+          <div class="contact-content">
+            <span class="contact-label">Get in Touch</span>
+            <h2 class="contact-heading">Let's Connect</h2>
+            <p class="contact-body">
+              I'm always open to thoughtful conversations about design, collaboration, or new opportunities. The best way to reach me is email; I actually read it.
+            </p>
+            <div class="contact-links">
+              <a href="mailto:sara@msswilliams.com" class="contact-email">sara@msswilliams.com</a>
+              <div class="contact-socials">
+                <a
+                  href="https://www.linkedin.com/in/sara-williams-46a36b198/"
+                  class="social-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn, Sara Williams"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                  </svg>
+                  LinkedIn
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="footer-bar">
+          <p class="footer-copy">© 2026 Sara Williams. All rights reserved.</p>
+          <nav aria-label="Footer navigation">
+            <ul class="footer-nav" role="list">
+              <li><a href="index.html#work">Work</a></li>
+              <li><a href="about.html">About</a></li>
+              <li><a href="index.html#contact">Contact</a></li>
+              <li><a href="#" aria-label="Download resume">Resume</a></li>
+            </ul>
+          </nav>
+        </div>
+
+      </div>
+    </section>
+
+  </div><!-- end .page -->
+
+
+  <script>
+    // ===== Nav scroll =====
+    const nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 36);
+    }, { passive: true });
+    nav.classList.toggle('scrolled', window.scrollY > 36);
+
+    // ===== Mobile hamburger =====
+    const hamburger = document.getElementById('hamburger');
+    const drawer    = document.getElementById('mobileDrawer');
+    hamburger.addEventListener('click', () => {
+      const isOpen = drawer.classList.toggle('open');
+      hamburger.setAttribute('aria-expanded', isOpen);
+      hamburger.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
+    });
+    drawer.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        drawer.classList.remove('open');
+        hamburger.setAttribute('aria-expanded', 'false');
+        hamburger.setAttribute('aria-label', 'Open menu');
+      });
+    });
+
+    // ===== Scroll fade-ins =====
+    const fadeEls = document.querySelectorAll('.fade-in');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -24px 0px' });
+    fadeEls.forEach(el => observer.observe(el));
+
+    // ===== Smooth scroll with nav offset =====
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        const id = this.getAttribute('href');
+        if (id === '#') return;
+        const target = document.querySelector(id);
+        if (!target) return;
+        e.preventDefault();
+        const offset = nav.offsetHeight + 12;
+        const top = target.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top, behavior: 'smooth' });
+      });
+    });
+  </script>
+
+</body>
+</html>
