@@ -1,1563 +1,367 @@
 <!DOCTYPE html>
+<!--
+  entry.html — Site entry screen (landing page)
+  This is the intended entry point for the site.
+  GitHub Pages: set this as the root index or rename to index.html and rename the current index.html to portfolio.html.
+  Returning visitors are detected via sessionStorage key "introSeen" and redirected straight to home.html.
+-->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sara Williams — Senior UX/UI Designer</title>
+  <title>Sara Williams — UX Designer</title>
   <meta name="description" content="Senior UX/UI Designer at Deloitte specializing in healthcare enrollment platforms, Medicaid compliance tools, and government portals.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
 
   <style>
-    /* ===== RESET & BASE ===== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
-      --bg:             #F9F7F2;
-      --text-primary:   #1C1C1A;
-      --text-secondary: #5A5855;
-      --text-muted:     #9A9690;
-      --accent:         #2B3A4A;
-      --accent-mid:     #3D5166;
-      --accent-light:   #E8EDF2;
-      --accent-line:    rgba(43, 58, 74, 0.12);
-      --card-bg:        rgba(255, 255, 255, 0.68);
-      --card-border:    rgba(43, 58, 74, 0.09);
-      --font-display:   'Playfair Display', Georgia, serif;
-      --font-body:      'DM Sans', 'Helvetica Neue', sans-serif;
-      --nav-h:          68px;
-      --max-w:          1200px;
-      --radius:         12px;
-      --shadow-sm:      0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03);
-      --shadow-md:      0 4px 18px rgba(43,58,74,0.09), 0 2px 6px rgba(43,58,74,0.04);
-      --shadow-lg:      0 14px 36px rgba(43,58,74,0.13), 0 4px 12px rgba(43,58,74,0.06);
-      --ease:           cubic-bezier(0.4, 0, 0.2, 1);
-      --t:              240ms;
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: var(--font-body);
-      background-color: var(--bg);
-      color: var(--text-primary);
-      font-size: 16px;
-      line-height: 1.65;
-      overflow-x: hidden;
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #080e14;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
 
-    /* ===== MESH GRADIENT BACKGROUND ===== */
-    .mesh-bg {
+    /* Page wrapper — fades out on exit */
+    #entry-page {
       position: fixed;
       inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    .blob {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(90px);
-    }
-
-    .blob-1 {
-      width: 640px; height: 640px;
-      background: radial-gradient(circle, rgba(162, 182, 168, 0.32) 0%, transparent 70%);
-      top: -160px; right: -100px;
-    }
-    .blob-2 {
-      width: 520px; height: 520px;
-      background: radial-gradient(circle, rgba(210, 195, 175, 0.28) 0%, transparent 70%);
-      bottom: 18%; left: -120px;
-    }
-    .blob-3 {
-      width: 420px; height: 420px;
-      background: radial-gradient(circle, rgba(178, 195, 212, 0.22) 0%, transparent 70%);
-      top: 42%; right: 12%;
-    }
-    .blob-4 {
-      width: 360px; height: 360px;
-      background: radial-gradient(circle, rgba(200, 183, 162, 0.18) 0%, transparent 70%);
-      bottom: -60px; right: 32%;
-    }
-
-    /* ===== PAGE WRAPPER ===== */
-    .page {
-      position: relative;
-      z-index: 1;
-    }
-
-    .container {
-      max-width: var(--max-w);
-      margin: 0 auto;
-      padding: 0 40px;
-    }
-
-    /* ===== SCROLL ANIMATIONS ===== */
-    .fade-in {
-      opacity: 0;
-      transform: translateY(22px);
-      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
-    }
-    .fade-in.visible { opacity: 1; transform: translateY(0); }
-    .delay-1 { transition-delay: 0.08s; }
-    .delay-2 { transition-delay: 0.16s; }
-    .delay-3 { transition-delay: 0.24s; }
-    .delay-4 { transition-delay: 0.32s; }
-
-    @media (prefers-reduced-motion: reduce) {
-      .fade-in { opacity: 1; transform: none; transition: none; }
-    }
-
-    /* ===== TYPOGRAPHY UTILITIES ===== */
-    .section-label {
-      font-family: var(--font-body);
-      font-size: 0.7rem;
-      font-weight: 500;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--accent);
-      opacity: 0.55;
-      margin-bottom: 14px;
-    }
-
-    .section-title {
-      font-family: var(--font-display);
-      font-size: clamp(1.75rem, 3vw, 2.4rem);
-      font-weight: 600;
-      line-height: 1.15;
-      letter-spacing: -0.02em;
-      color: var(--text-primary);
-    }
-
-    .section-title em {
-      font-style: italic;
-      font-weight: 400;
-      color: var(--text-secondary);
-    }
-
-    /* ===== NAVIGATION ===== */
-    .nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      height: var(--nav-h);
-      transition:
-        background var(--t) var(--ease),
-        border-color var(--t) var(--ease),
-        box-shadow var(--t) var(--ease);
-    }
-
-    .nav.scrolled {
-      background: rgba(249, 247, 242, 0.90);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--accent-line);
-      box-shadow: 0 1px 14px rgba(43,58,74,0.05);
-    }
-
-    .nav-inner {
-      max-width: var(--max-w);
-      margin: 0 auto;
-      padding: 0 40px;
-      height: 100%;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .nav-logo {
-      font-family: var(--font-display);
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      text-decoration: none;
-      letter-spacing: -0.01em;
-    }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 34px;
-      list-style: none;
-    }
-
-    .nav-links a {
-      font-family: var(--font-body);
-      font-size: 0.85rem;
-      font-weight: 400;
-      letter-spacing: 0.025em;
-      color: var(--text-secondary);
-      text-decoration: none;
-      position: relative;
-      transition: color var(--t) var(--ease);
-    }
-
-    .nav-links a::after {
-      content: '';
-      position: absolute;
-      bottom: -3px; left: 0; right: 0;
-      height: 1px;
-      background: var(--accent);
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform var(--t) var(--ease);
-    }
-
-    .nav-links a:hover { color: var(--accent); }
-    .nav-links a:hover::after { transform: scaleX(1); }
-
-    /* Mobile hamburger */
-    .nav-hamburger {
-      display: none;
-      flex-direction: column;
-      gap: 5px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 6px;
-    }
-
-    .nav-hamburger span {
-      display: block;
-      width: 22px;
-      height: 1.5px;
-      background: var(--text-primary);
-      border-radius: 2px;
-      transition: transform var(--t) var(--ease), opacity var(--t) var(--ease);
-    }
-
-    .nav-hamburger[aria-expanded="true"] span:nth-child(1) {
-      transform: translateY(6.5px) rotate(45deg);
-    }
-    .nav-hamburger[aria-expanded="true"] span:nth-child(2) {
-      opacity: 0;
-    }
-    .nav-hamburger[aria-expanded="true"] span:nth-child(3) {
-      transform: translateY(-6.5px) rotate(-45deg);
-    }
-
-    /* Mobile drawer */
-    .nav-drawer {
-      display: none;
-      position: fixed;
-      top: var(--nav-h); left: 0; right: 0;
-      background: rgba(249, 247, 242, 0.96);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--accent-line);
-      padding: 28px 40px 36px;
-      z-index: 99;
-    }
-
-    .nav-drawer.open { display: block; }
-
-    .nav-drawer ul {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 22px;
-    }
-
-    .nav-drawer ul a {
-      font-family: var(--font-body);
-      font-size: 1.05rem;
-      color: var(--text-secondary);
-      text-decoration: none;
-      transition: color var(--t);
-    }
-
-    .nav-drawer ul a:hover { color: var(--accent); }
-
-    /* ===== HERO ===== */
-    #hero {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      padding-top: calc(var(--nav-h) + 56px);
-      padding-bottom: 88px;
-    }
-
-    .hero-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 64px;
-      align-items: center;
-      width: 100%;
-    }
-
-    .hero-eyebrow {
-      font-family: var(--font-body);
-      font-size: 0.75rem;
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-      margin-bottom: 24px;
-    }
-
-    .hero-name {
-      font-family: var(--font-display);
-      font-size: clamp(3.2rem, 5.8vw, 5.2rem);
-      font-weight: 700;
-      line-height: 1.0;
-      letter-spacing: -0.03em;
-      color: var(--text-primary);
-      margin-bottom: 28px;
-    }
-
-    .hero-headline {
-      font-family: var(--font-display);
-      font-size: clamp(1.2rem, 2vw, 1.55rem);
-      font-weight: 400;
-      font-style: italic;
-      line-height: 1.5;
-      color: var(--text-secondary);
-      margin-bottom: 24px;
-      max-width: 560px;
-    }
-
-    .hero-sub {
-      font-size: 0.975rem;
-      line-height: 1.8;
-      color: var(--text-secondary);
-      max-width: 540px;
-      margin-bottom: 44px;
-    }
-
-    .hero-actions {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
-    /* Buttons */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-family: var(--font-body);
-      font-size: 0.875rem;
-      font-weight: 500;
-      letter-spacing: 0.02em;
-      padding: 13px 26px;
-      border-radius: 6px;
-      text-decoration: none;
-      cursor: pointer;
-      border: 1.5px solid transparent;
-      transition:
-        background var(--t) var(--ease),
-        border-color var(--t) var(--ease),
-        color var(--t) var(--ease),
-        transform var(--t) var(--ease),
-        box-shadow var(--t) var(--ease);
-    }
-
-    .btn:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 3px;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-    }
-
-    .btn-primary:hover {
-      background: var(--accent-mid);
-      border-color: var(--accent-mid);
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
-    }
-
-    .btn-outline {
-      background: transparent;
-      color: var(--accent);
-      border-color: var(--accent);
-    }
-
-    .btn-outline:hover {
-      background: var(--accent-light);
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .btn-text {
-      font-family: var(--font-body);
-      font-size: 0.82rem;
-      font-weight: 400;
-      color: var(--text-secondary);
-      text-decoration: none;
-      padding: 13px 2px;
-      border-bottom: 1px solid transparent;
-      transition: color var(--t) var(--ease), border-color var(--t) var(--ease);
-    }
-
-    .btn-text:hover {
-      color: var(--accent);
-      border-bottom-color: var(--accent);
-    }
-
-    /* ===== BENTO GRID ===== */
-    .hero-visual {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: auto auto auto;
-      gap: 12px;
-      align-content: start;
-    }
-
-    .skill-card {
-      background: #ffffff;
-      border-radius: 12px;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      padding: 11px 14px;
-      font-family: var(--font-body);
-      cursor: default;
-      user-select: none;
-      opacity: 0;
-    }
-
-    /* Card 1 spans full width */
-    .skill-card--wide {
-      grid-column: 1 / -1;
-    }
-
-    /* Staggered load-in — no continuous float */
-    @keyframes bento-in {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .skill-card:nth-child(1) { animation: bento-in 500ms ease-out 100ms both; }
-    .skill-card:nth-child(2) { animation: bento-in 500ms ease-out 200ms both; }
-    .skill-card:nth-child(3) { animation: bento-in 500ms ease-out 280ms both; }
-    .skill-card:nth-child(4) { animation: bento-in 500ms ease-out 360ms both; }
-    .skill-card:nth-child(5) { animation: bento-in 500ms ease-out 440ms both; }
-
-    /* Typography */
-    .sc-label {
-      font-size: 9px;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #9a9895;
-      margin-bottom: 8px;
-    }
-
-    .sc-value {
-      font-size: 13px;
-      font-weight: 500;
-      color: #1a1a18;
-    }
-
-    .sc-sub {
-      font-size: 11px;
-      color: #8a8885;
-      line-height: 1.5;
-    }
-
-    .sc-pill {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 500;
-      padding: 3px 10px;
-      border-radius: 20px;
-      white-space: nowrap;
-    }
-
-    .sc-stat {
-      font-size: 28px;
-      font-weight: 800;
-      color: #1a1a18;
-      line-height: 1;
-    }
-
-    /* Card 1 — Design System wide layout */
-    .sc-card1-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-    }
-
-    .sc-card1-left { flex-shrink: 0; }
-
-    .sc-stat-inline {
-      display: flex;
-      align-items: baseline;
-      gap: 7px;
-      margin-top: 4px;
-    }
-
-    .sc-card1-right {
-      flex: 1;
-      max-width: 160px;
-    }
-
-    .sc-progress-track {
-      width: 100%;
-      height: 4px;
-      background: #e8e4dc;
-      border-radius: 3px;
-      overflow: hidden;
-      margin-bottom: 5px;
-    }
-
-    @keyframes fill-skill-bar {
-      from { width: 0%; }
-      to   { width: 70%; }
-    }
-
-    .sc-progress-fill {
-      height: 100%;
-      width: 70%;
-      background: #1a1a18;
-      border-radius: 3px;
-      animation: fill-skill-bar 1.8s ease-out 300ms both;
-    }
-
-    /* Card 2 — Research rows */
-    .sc-rows {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .sc-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      color: #1a1a18;
-    }
-
-    .sc-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    /* Card 3 — A11y */
-    .sc-a11y-main {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 8px;
-    }
-
-    .sc-check {
-      font-size: 13px;
-      color: #16a34a;
-      font-weight: 600;
-    }
-
-    .sc-pills {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-    }
-
-    /* Rotating word */
-    @keyframes word-in  { from { opacity:0; transform:translateY(6px);  } to { opacity:1; transform:translateY(0);   } }
-    @keyframes word-out { from { opacity:1; transform:translateY(0);    } to { opacity:0; transform:translateY(-6px); } }
-
-    /* ===== DIVIDER ===== */
-    .divider {
-      height: 1px;
-      background: var(--accent-line);
-    }
-
-    /* ===== SECTION SHARED ===== */
-    section { padding: 96px 0; }
-
-    /* ===== FEATURED WORK ===== */
-    .work-header {
-      display: flex;
-      align-items: flex-end;
-      justify-content: space-between;
-      margin-bottom: 52px;
-      gap: 24px;
-    }
-
-    .link-arrow {
-      font-family: var(--font-body);
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--accent);
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-      transition: gap var(--t) var(--ease), color var(--t) var(--ease);
-    }
-
-    .link-arrow:hover { gap: 10px; }
-
-    .work-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 22px;
-    }
-
-    /* Card image area */
-    .card-img {
-      aspect-ratio: 16/9;
-      width: 100%;
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-
-    .card-img img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: transform 0.5s var(--ease);
-    }
-
-    .case-card:hover .card-img img {
-      transform: scale(1.03);
-    }
-
-    @keyframes shimmer {
-      0%   { background-position: -600px 0; }
-      100% { background-position: 600px 0; }
-    }
-
-    .card-img-placeholder {
-      aspect-ratio: 3/2;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      flex-shrink: 0;
-      background: linear-gradient(
-        105deg,
-        #9BADB8 0%,
-        #A8BAC4 30%,
-        #C2D0D8 48%,
-        #B4C4CC 52%,
-        #9BADB8 70%,
-        #8FA2AE 100%
-      );
-      background-size: 1200px 100%;
-      animation: shimmer 3s infinite linear;
+      background: #080e14;
+      opacity: 1;
+      transition: opacity 600ms cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .card-img-placeholder span {
-      font-family: var(--font-body);
-      font-size: 0.65rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.6);
+    #entry-page.fade-out { opacity: 0; pointer-events: none; }
+
+    /* Canvas glow — drawn via JS */
+    #glow-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
     }
 
-    .card-img-placeholder::before {
-      content: '';
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      border: 1.5px solid rgba(255, 255, 255, 0.3);
-      display: block;
-    }
-
-    /* Card body (content below image) */
-    .card-body {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      padding: 28px 30px 24px;
-    }
-
-    /* Case study card */
-    .case-card {
-      display: flex;
-      flex-direction: column;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius);
-      padding: 0;
-      overflow: hidden;
-      text-decoration: none;
-      cursor: pointer;
+    /* Content column */
+    .entry-inner {
       position: relative;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      transition:
-        transform var(--t) var(--ease),
-        box-shadow var(--t) var(--ease),
-        border-color var(--t) var(--ease);
-    }
-
-    .case-card:focus-visible {
-      outline: 2px solid var(--accent);
-      outline-offset: 3px;
-    }
-
-    .case-card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow-lg);
-      border-color: rgba(43,58,74,0.16);
-    }
-
-    .card-num {
-      font-family: var(--font-body);
-      font-size: 0.68rem;
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 18px;
-    }
-
-    .card-title {
-      font-family: var(--font-display);
-      font-size: 1.35rem;
-      font-weight: 600;
-      line-height: 1.2;
-      letter-spacing: -0.015em;
-      color: var(--text-primary);
-      margin-bottom: 10px;
-    }
-
-    .card-tagline {
-      font-size: 0.9rem;
-      line-height: 1.65;
-      color: var(--text-secondary);
-      margin-bottom: 22px;
-      flex: 1;
-    }
-
-    .card-tags {
+      z-index: 1;
       display: flex;
-      flex-wrap: wrap;
-      gap: 7px;
-      margin-bottom: 22px;
-    }
-
-    .tag {
-      font-family: var(--font-body);
-      font-size: 0.67rem;
-      font-weight: 500;
-      letter-spacing: 0.04em;
-      color: var(--accent);
-      background: var(--accent-light);
-      padding: 4px 10px;
-      border-radius: 100px;
-      white-space: nowrap;
-    }
-
-    .card-cta {
-      font-family: var(--font-body);
-      font-size: 0.83rem;
-      font-weight: 500;
-      color: var(--accent);
-      display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 5px;
-      transition: gap var(--t) var(--ease);
+      text-align: center;
+      padding: 0 32px;
+      max-width: 760px;
+      width: 100%;
     }
 
-    .case-card:hover .card-cta { gap: 9px; }
+    /* Text lines */
+    .entry-lines {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 56px;
+      width: 100%;
+    }
 
-    /* Hover reveal */
-    .card-reveal {
-      overflow: hidden;
-      max-height: 0;
+    .line-1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(22px, 3vw, 30px);
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.3;
+      min-height: 1.3em;
+    }
+
+    .line-2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: clamp(22px, 3vw, 30px);
+      font-weight: 400;
+      font-style: italic;
+      color: #c8d4e0;
+      line-height: 1.3;
+      min-height: 1.3em;
+    }
+
+    .line-3 {
+      font-family: 'DM Sans', 'Helvetica Neue', sans-serif;
+      font-size: clamp(12px, 1.4vw, 14px);
+      font-weight: 300;
+      color: #8a9db0;
+      line-height: 1.7;
+      margin-top: 4px;
+      min-height: 1.7em;
+    }
+
+    /* Blinking cursor */
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      background: rgba(255, 255, 255, 0.5);
+      margin-left: 3px;
+      vertical-align: text-bottom;
+      animation: blink 800ms step-end infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    /* CTA area — hidden until typewriter finishes */
+    .entry-cta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
       opacity: 0;
-      transform: translateY(5px);
-      transition:
-        max-height 0.35s var(--ease),
-        opacity 0.3s var(--ease),
-        transform 0.3s var(--ease);
-      margin-top: 0;
+      transform: translateY(10px);
+      transition: opacity 700ms cubic-bezier(0.4, 0, 0.2, 1), transform 700ms cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .case-card:hover .card-reveal {
-      max-height: 80px;
+    .entry-cta.visible {
       opacity: 1;
       transform: translateY(0);
-      margin-top: 18px;
-      padding-top: 18px;
-      border-top: 1px solid var(--accent-line);
     }
 
-    .reveal-label {
-      font-size: 0.68rem;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 4px;
-    }
-
-    .reveal-text {
-      font-size: 0.83rem;
-      line-height: 1.55;
-      color: var(--text-secondary);
-    }
-
-    /* ===== MINI ABOUT ===== */
-    .about-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 80px;
-      align-items: center;
-    }
-
-    .about-body {
-      font-size: 1.03rem;
-      line-height: 1.82;
-      color: var(--text-secondary);
-      margin: 20px 0 28px;
-    }
-
-    .about-stats {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .stat-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 10px;
-      padding: 22px 26px;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-
-    .stat-number {
-      font-family: var(--font-display);
-      font-size: 1.9rem;
-      font-weight: 700;
-      color: var(--accent);
-      line-height: 1.05;
-      margin-bottom: 5px;
-    }
-
-    .stat-desc {
-      font-size: 0.84rem;
-      color: var(--text-secondary);
-      line-height: 1.45;
-    }
-
-    /* ===== CONTACT ===== */
-    #contact { padding-bottom: 60px; }
-
-    .contact-block {
-      background: var(--accent);
-      border-radius: 20px;
-      padding: 72px 80px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .contact-block::before {
-      content: '';
-      position: absolute;
-      width: 340px; height: 340px;
-      top: -80px; right: -60px;
-      background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 68%);
-      border-radius: 50%;
-    }
-
-    .contact-block::after {
-      content: '';
-      position: absolute;
-      width: 220px; height: 220px;
-      bottom: -50px; left: 12%;
-      background: radial-gradient(circle, rgba(255,255,255,0.04) 0%, transparent 68%);
-      border-radius: 50%;
-    }
-
-    .contact-content { position: relative; z-index: 1; max-width: 620px; }
-
-    .contact-label {
-      font-size: 0.7rem;
-      font-weight: 500;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.45);
-      margin-bottom: 18px;
-    }
-
-    .contact-heading {
-      font-family: var(--font-display);
-      font-size: clamp(2rem, 3.5vw, 2.9rem);
-      font-weight: 600;
-      line-height: 1.12;
-      letter-spacing: -0.025em;
-      color: #FFFFFF;
-      margin-bottom: 18px;
-    }
-
-    .contact-body {
-      font-size: 0.975rem;
-      line-height: 1.8;
-      color: rgba(255,255,255,0.62);
-      margin-bottom: 36px;
-    }
-
-    .contact-links {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 20px;
-    }
-
-    .contact-email {
-      font-family: var(--font-body);
-      font-size: 1rem;
-      font-weight: 500;
-      color: #fff;
+    .btn-see-work {
+      font-family: 'DM Sans', 'Helvetica Neue', sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      color: #ffffff;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 8px;
+      padding: 14px 28px 12px;
+      cursor: pointer;
       text-decoration: none;
-      border-bottom: 1px solid rgba(255,255,255,0.28);
-      padding-bottom: 2px;
-      transition: border-color var(--t) var(--ease);
+      display: inline-block;
+      text-align: center;
+      transition: border-color 240ms ease, background 240ms ease;
     }
 
-    .contact-email:hover { border-color: #fff; }
-
-    .contact-socials {
-      display: flex;
-      align-items: center;
-      gap: 14px;
+    .btn-see-work:hover {
+      border-color: rgba(255, 255, 255, 0.42);
+      background: rgba(255, 255, 255, 0.04);
     }
 
-    .social-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.85rem;
-      color: rgba(255,255,255,0.55);
-      text-decoration: none;
-      transition: color var(--t) var(--ease);
-    }
 
-    .social-link:hover { color: #fff; }
-
-    .social-placeholder {
-      font-size: 0.76rem;
-      font-style: italic;
-      color: rgba(255,255,255,0.28);
-      padding: 5px 12px;
-      border: 1px dashed rgba(255,255,255,0.18);
-      border-radius: 100px;
-    }
-
-    .footer-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 16px;
-      padding: 28px 0 6px;
-    }
-
-    .footer-copy {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
-
-    .footer-nav {
-      display: flex;
-      gap: 22px;
-      list-style: none;
-    }
-
-    .footer-nav a {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      text-decoration: none;
-      transition: color var(--t) var(--ease);
-    }
-
-    .footer-nav a:hover { color: var(--accent); }
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 1024px) {
-      .hero-grid { gap: 48px; }
-    }
-
-    @media (max-width: 768px) {
-      .container { padding: 0 22px; }
-      .nav-inner { padding: 0 22px; }
-      section { padding: 64px 0; }
-
-      .nav-links { display: none; }
-      .nav-hamburger { display: flex; }
-      .nav-drawer { padding: 28px 22px 36px; }
-
-      #hero {
-        min-height: auto;
-        padding-top: calc(var(--nav-h) + 36px);
-        padding-bottom: 60px;
-      }
-      .hero-grid {
-        grid-template-columns: 1fr;
-        gap: 44px;
-      }
-      .hero-visual {
-        display: none !important;
-      }
-      .hero-name { font-size: 2.8rem; }
-
-      .work-grid { grid-template-columns: 1fr; }
-      .work-header { flex-direction: column; align-items: flex-start; }
-
-      .about-grid { grid-template-columns: 1fr; gap: 48px; }
-
-      .contact-block { padding: 48px 32px; }
-      .footer-bar { flex-direction: column; align-items: flex-start; }
-    }
-
-    @media (max-width: 480px) {
-      .hero-name { font-size: 2.2rem; }
-      .contact-block { padding: 40px 22px; }
-      .hero-actions { gap: 10px; }
+@media (prefers-reduced-motion: reduce) {
+      .entry-cta { opacity: 1; transform: none; transition: none; }
+      .cursor { animation: none; opacity: 1; }
     }
   </style>
 </head>
-
 <body>
 
-  <!-- ===== MESH GRADIENT ===== -->
-  <div class="mesh-bg" aria-hidden="true">
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
-    <div class="blob blob-4"></div>
-  </div>
+  <div id="entry-page">
+    <canvas id="glow-canvas" aria-hidden="true"></canvas>
+    <div class="entry-inner">
 
-  <div class="page">
-
-    <!-- ===== NAVIGATION ===== -->
-    <nav class="nav" id="mainNav" aria-label="Main navigation">
-      <div class="nav-inner">
-        <a href="#hero" class="nav-logo">Sara Williams</a>
-
-        <ul class="nav-links" role="list">
-          <li><a href="#hero">Home</a></li>
-          <li><a href="#work">Work</a></li>
-          <li><a href="other-work.html">Other Work</a></li>
-          <li><a href="about.html">About</a></li>
-          <li><a href="#contact">Contact</a></li>
-        </ul>
-
-        <button
-          class="nav-hamburger"
-          id="hamburger"
-          aria-label="Open menu"
-          aria-expanded="false"
-          aria-controls="mobileDrawer"
-        >
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
+      <div class="entry-lines">
+        <p class="line-1" id="line1" aria-live="polite"></p>
+        <p class="line-2" id="line2"></p>
+        <p class="line-3" id="line3"></p>
       </div>
-    </nav>
 
-    <!-- Mobile Drawer -->
-    <div class="nav-drawer" id="mobileDrawer" role="dialog" aria-label="Mobile navigation">
-      <ul role="list">
-        <li><a href="#hero">Home</a></li>
-        <li><a href="#work">Work</a></li>
-        <li><a href="other-work.html">Other Work</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="#contact">Contact</a></li>
-      </ul>
+      <div class="entry-cta" id="cta" aria-hidden="true">
+        <a href="home.html" class="btn-see-work" id="btn-work">View my work →</a>
+      </div>
+
     </div>
 
+    <!-- Ambient signature -->
+    <p aria-hidden="true" style="position:fixed; bottom:28px; left:32px; font-family:'DM Sans','Helvetica Neue',sans-serif; font-size:13px; font-weight:400; letter-spacing:0.18em; text-transform:uppercase; color:#c8d4e0; opacity:0.78; z-index:1; pointer-events:none; user-select:none;">Sara Williams</p>
 
-    <!-- ===== HERO ===== -->
-    <section id="hero" aria-label="Introduction">
-      <div class="container">
-        <div class="hero-grid">
-
-          <div>
-            <p class="hero-eyebrow fade-in">Senior UX/UI Designer &nbsp;·&nbsp; Deloitte</p>
-
-            <h1 class="hero-name fade-in delay-1">
-              <span style="display:block; color:var(--text-primary); font-weight:700;">Sara</span>
-              <span style="display:block; color:var(--text-secondary); font-style:italic; font-weight:400; opacity:0.55;">Williams.</span>
-            </h1>
-
-            <!-- Typewriter line -->
-            <div class="fade-in delay-2" style="display:flex; align-items:center; margin-bottom:24px; font-family:'DM Sans','Helvetica Neue',sans-serif; font-size:22px; font-weight:300; color:var(--text-secondary);">
-              <span>Designing for&nbsp;</span><span id="hero-typewriter" style="color:var(--accent); font-weight:500;"></span><span id="hero-tw-cursor" style="color:var(--accent); font-weight:300; opacity:1;">|</span>
-            </div>
-
-            <div class="fade-in delay-3" style="border-left:2px solid var(--accent-line); padding-left:14px; margin-bottom:40px; max-width:540px;">
-              <p style="font-family:'DM Sans','Helvetica Neue',sans-serif; font-size:0.975rem; font-weight:300; line-height:1.8; color:var(--text-secondary);">
-                Senior UX/UI Designer at Deloitte. I specialize in research-led, end-to-end product design for regulated industries — healthcare enrollment platforms, Medicaid compliance tools, and government portals where a confusing flow doesn't just frustrate users — it affects their access to coverage.
-              </p>
-            </div>
-
-            <div class="hero-actions fade-in delay-4">
-              <a href="#work" class="btn btn-primary">View My Work</a>
-              <a href="about.html" class="btn btn-outline">About Me</a>
-              <a href="#" class="btn-text" aria-label="Download resume PDF">↓ Download Resume</a>
-            </div>
-          </div>
-
-          <!-- Hero bento grid -->
-          <div class="hero-visual" aria-hidden="true">
-
-            <!-- Card 1: Design System — full width -->
-            <div class="skill-card skill-card--wide">
-              <div class="sc-label">Design System</div>
-              <div class="sc-card1-inner">
-                <div class="sc-card1-left">
-                  <div class="sc-stat-inline">
-                    <span class="sc-stat">47</span>
-                    <span class="sc-sub">components shipped</span>
-                  </div>
-                </div>
-                <div class="sc-card1-right">
-                  <div class="sc-progress-track">
-                    <div class="sc-progress-fill"></div>
-                  </div>
-                  <div class="sc-sub" style="text-align: right;">Token coverage · 70%</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 2: Research Synthesis — left -->
-            <div class="skill-card">
-              <div class="sc-label">Research Synthesis</div>
-              <div class="sc-rows">
-                <div class="sc-row">
-                  <span class="sc-dot" style="background: #4f46e5;"></span>
-                  14 user interviews
-                </div>
-                <div class="sc-row">
-                  <span class="sc-dot" style="background: #9ca3af;"></span>
-                  Affinity mapped
-                </div>
-                <div class="sc-row">
-                  <span class="sc-dot" style="background: #9ca3af;"></span>
-                  HMW framing
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 3: A11y — right -->
-            <div class="skill-card">
-              <div class="sc-label">A11Y Verified</div>
-              <div class="sc-a11y-main">
-                <span class="sc-check">✓</span>
-                <span class="sc-value">WCAG 2.1 AA</span>
-              </div>
-              <div class="sc-pills" style="margin-top: 8px;">
-                <span class="sc-pill" style="background: #f0fdf4; color: #166534;">Focus states</span>
-                <span class="sc-pill" style="background: #f0fdf4; color: #166534;">4.5:1 contrast</span>
-              </div>
-            </div>
-
-            <!-- Card 4: Human-in-the-Loop AI — left -->
-            <div class="skill-card">
-              <div class="sc-label">Human-in-the-Loop AI</div>
-              <p class="sc-value" style="margin-bottom: 8px;">AI drafts → Human decides</p>
-              <div class="sc-pills" style="display: flex; gap: 5px; flex-wrap: wrap;">
-                <span class="sc-pill" style="background: #eff6ff; color: #1d4ed8;">Review</span>
-                <span class="sc-pill" style="background: #fef9c3; color: #854d0e;">Override</span>
-                <span class="sc-pill" style="background: #f0fdf4; color: #166534;">Confirm</span>
-              </div>
-            </div>
-
-            <!-- Card 5: Handoff Ready — right -->
-            <div class="skill-card">
-              <div class="sc-label">Handoff Ready</div>
-              <div class="sc-pills" style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px;">
-                <span class="sc-pill" style="background: #f3f4f6; color: #374151;">Annotated specs</span>
-                <span class="sc-pill" style="background: #f3f4f6; color: #374151;">Dev tokens</span>
-              </div>
-              <div class="sc-sub">↓ 70% reduction in handoff time</div>
-            </div>
-
-          </div>
-
-        </div>
-
-        <!-- Scroll indicator -->
-        <div style="display:flex; align-items:center; justify-content:center; gap:10px; padding-top:36px; padding-bottom:4px;" aria-hidden="true">
-          <span style="display:inline-block; width:4px; height:4px; border-radius:50%; background:var(--accent-line);"></span>
-          <span style="font-family:'DM Sans','Helvetica Neue',sans-serif; font-size:9px; font-weight:400; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-muted); opacity:0.6;">scroll to explore work</span>
-          <span style="display:inline-block; width:4px; height:4px; border-radius:50%; background:var(--accent-line);"></span>
-        </div>
-
-      </div>
-    </section>
-
-    <div class="divider container" aria-hidden="true"></div>
-
-
-    <!-- ===== FEATURED WORK ===== -->
-    <section id="work" aria-label="Featured work">
-      <div class="container">
-
-        <div class="work-header fade-in">
-          <div>
-            <p class="section-label">Selected Projects</p>
-            <h2 class="section-title">Featured <em>Work</em></h2>
-          </div>
-          <a href="other-work.html" class="link-arrow">All Projects →</a>
-        </div>
-
-        <div class="work-grid">
-
-          <!-- Card 01 -->
-          <a href="state-benefits-portal.html" class="case-card fade-in" aria-label="State Benefits Portal — view case study">
-            <div class="card-img">
-              <img
-                src="portfolio/assets-state benefit portal/hero-state-benefit-portal.png"
-                alt="State Benefits Portal project preview"
-                loading="lazy"
-              >
-            </div>
-            <div class="card-body">
-              <span class="card-num">01</span>
-              <h3 class="card-title">State Benefits Portal</h3>
-              <p class="card-tagline">
-                Designing accessible, compliance-driven UX for a state health insurance exchange — at scale.
-              </p>
-              <div class="card-tags" aria-label="Project tags">
-                <span class="tag">Healthcare</span>
-                <span class="tag">Enterprise UX</span>
-                <span class="tag">Accessibility</span>
-                <span class="tag">Gov &amp; Public Services</span>
-              </div>
-              <span class="card-cta" aria-hidden="true">→ View Case Study</span>
-              <div class="card-reveal" aria-hidden="true">
-                <p class="reveal-label">What I did</p>
-                <p class="reveal-text">End-to-end UX research, information architecture, accessibility auditing, and design system contribution for a state-level ACA marketplace.</p>
-              </div>
-            </div>
-          </a>
-
-          <!-- Card 02 -->
-          <a href="compliance-medicaid-ai.html" class="case-card fade-in delay-1" aria-label="Compliance.Medicaid.AI — view case study">
-            <div class="card-img">
-              <img
-                src="portfolio/assets-medicaid-ai/medicaid-ai-hero-shot1.png"
-                alt="Compliance.Medicaid.AI project preview"
-                loading="lazy"
-              >
-            </div>
-            <div class="card-body">
-              <span class="card-num">02</span>
-              <h3 class="card-title">Compliance.Medicaid.AI</h3>
-              <p class="card-tagline">
-                Designing a human-in-the-loop AI tool for Medicaid contract compliance monitoring.
-              </p>
-              <div class="card-tags" aria-label="Project tags">
-                <span class="tag">AI Product Design</span>
-                <span class="tag">Healthcare</span>
-                <span class="tag">Human-in-the-Loop</span>
-                <span class="tag">Gov &amp; Public Services</span>
-              </div>
-              <span class="card-cta" aria-hidden="true">→ View Case Study</span>
-              <div class="card-reveal" aria-hidden="true">
-                <p class="reveal-label">What I did</p>
-                <p class="reveal-text">Designed the review workflow, AI confidence visualization, and escalation patterns for analysts monitoring Medicaid contract compliance.</p>
-              </div>
-            </div>
-          </a>
-
-          <!-- Card 03 -->
-          <a href="ingage.html" class="case-card fade-in delay-2" aria-label="Ingage — view case study">
-            <div class="card-img">
-              <img
-                src="portfolio/assets-ingage/design-hifi-hero-shot.jpg"
-                alt="Ingage project preview"
-                loading="lazy"
-              >
-            </div>
-            <div class="card-body">
-              <span class="card-num">03</span>
-              <h3 class="card-title">Ingage</h3>
-              <p class="card-tagline">
-                A mobile app helping retirees build social connection, find purpose, and engage with their community.
-              </p>
-              <div class="card-tags" aria-label="Project tags">
-                <span class="tag">Research-Led</span>
-                <span class="tag">UX Strategy</span>
-              </div>
-              <span class="card-cta" aria-hidden="true">→ View Case Study</span>
-              <div class="card-reveal" aria-hidden="true">
-                <p class="reveal-label">What I did</p>
-                <p class="reveal-text">Led end-to-end UX research — 14 user interviews, a quantitative survey, and affinity mapping — that directly shaped the product direction.</p>
-              </div>
-            </div>
-          </a>
-
-          <!-- Card 04 -->
-          <a href="cora.html" class="case-card fade-in delay-3" aria-label="CORA — view case study">
-            <div class="card-img">
-              <img
-                src="portfolio/assets-cora/cora-hero-shot.jpg"
-                alt="CORA project preview"
-                loading="lazy"
-              >
-            </div>
-            <div class="card-body">
-              <span class="card-num">04</span>
-              <h3 class="card-title">CORA</h3>
-              <p class="card-tagline">
-                A smart compression sleeve and app helping injured athletes navigate recovery with real-time data, care team connection, and mental health support.
-              </p>
-              <div class="card-tags" aria-label="Project tags">
-                <span class="tag">Award-Winning</span>
-                <span class="tag">UX Design</span>
-              </div>
-              <span class="card-cta" aria-hidden="true">→ View Case Study</span>
-              <div class="card-reveal" aria-hidden="true">
-                <p class="reveal-label">What I did</p>
-                <p class="reveal-text">Owned all prototype fidelities, the full interaction model, and the Vision Video as Interaction Lead on a 5-person team.</p>
-              </div>
-            </div>
-          </a>
-
-        </div>
-      </div>
-    </section>
-
-    <div class="divider container" aria-hidden="true"></div>
-
-
-    <!-- ===== OTHER WORK anchor (placeholder for future section) ===== -->
-    <span id="other-work" style="display:block; height:0; overflow:hidden;" aria-hidden="true"></span>
-
-
-    <!-- ===== MINI ABOUT ===== -->
-    <section id="about-preview" aria-label="About Sara Williams">
-      <div class="container">
-        <div class="about-grid">
-
-          <div class="fade-in">
-            <p class="section-label">Who I Am</p>
-            <h2 class="section-title">A quick <em>intro</em></h2>
-            <p class="about-body">
-              I'm Sara — a UX designer who thinks in systems and advocates for the humans navigating them. Five years designing in regulated, high-stakes environments has made me a more precise, more empathetic, and more systems-oriented designer. I care about the work that most people find too complicated to bother with.
-            </p>
-            <a href="about.html" class="link-arrow">→ More about me</a>
-          </div>
-
-          <div class="about-stats fade-in delay-2">
-            <div class="stat-card">
-              <div class="stat-number">5+</div>
-              <div class="stat-desc">Years designing in regulated, high-stakes industries</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-number">End-to-end</div>
-              <div class="stat-desc">Research through delivery — I own the full design process</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-number">Deloitte</div>
-              <div class="stat-desc">Senior UX/UI Designer · Government &amp; Public Services</div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-
-    <!-- ===== CONTACT / FOOTER ===== -->
-    <section id="contact" aria-label="Contact">
-      <div class="container">
-
-        <div class="contact-block fade-in">
-          <div class="contact-content">
-            <p class="contact-label">Get in Touch</p>
-            <h2 class="contact-heading">Let's Connect</h2>
-            <p class="contact-body">
-              I'm always open to thoughtful conversations about design, collaboration, or new opportunities. The best way to reach me is email — I actually read it.
-            </p>
-            <div class="contact-links">
-              <a href="mailto:sara@msswilliams.com" class="contact-email">sara@msswilliams.com</a>
-              <div class="contact-socials">
-                <a
-                  href="https://linkedin.com/in/sara-williams-46a36b198"
-                  class="social-link"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="LinkedIn — Sara Williams"
-                >
-                  <!-- LinkedIn icon -->
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                  </svg>
-                  LinkedIn
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="footer-bar">
-          <p class="footer-copy">© 2026 Sara Williams. All rights reserved.</p>
-          <nav aria-label="Footer navigation">
-            <ul class="footer-nav" role="list">
-              <li><a href="#work">Work</a></li>
-              <li><a href="about.html">About</a></li>
-              <li><a href="#contact">Contact</a></li>
-              <li><a href="#" aria-label="Download resume">Resume</a></li>
-            </ul>
-          </nav>
-        </div>
-
-      </div>
-    </section>
-
-  </div><!-- end .page -->
-
+  </div>
 
   <script>
-    // ===== Returning visitor check — skip entry screen =====
-    // (No action needed here — entry.html handles the redirect.
-    //  index.html is the destination; just mark the session so
-    //  entry.html won't show again if the user navigates back.)
-    sessionStorage.setItem('introSeen', 'true');
+    // Returning visitors skip the intro entirely
+    if (sessionStorage.getItem('introSeen')) {
+      window.location.replace('home.html');
+    }
 
-    // ===== Hero typewriter =====
+    // ===== Canvas glow + particles =====
     (function () {
-      const phrases = ['complex systems', 'real people', 'regulated industries', 'accessibility', 'human-in-the-loop AI'];
-      const el  = document.getElementById('hero-typewriter');
-      const cur = document.getElementById('hero-tw-cursor');
-      if (!el || !cur) return;
+      const canvas = document.getElementById('glow-canvas');
+      const ctx = canvas.getContext('2d');
+      let start = null;
 
-      let phraseIdx = 0, charIdx = 0, deleting = false;
+      function resize() {
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize, { passive: true });
 
-      // Cursor blink via JS — no new keyframes needed
-      let cursorOn = true;
-      setInterval(() => { cursorOn = !cursorOn; cur.style.opacity = cursorOn ? '1' : '0'; }, 530);
+      // ── Particle system ──
+      const PARTICLE_COUNT = 55;
+      const particles = [];
 
-      function tick() {
-        const phrase = phrases[phraseIdx];
-        if (!deleting) {
-          charIdx++;
-          el.textContent = phrase.slice(0, charIdx);
-          if (charIdx === phrase.length) {
-            deleting = true;
-            setTimeout(tick, 1800);
-            return;
-          }
-          setTimeout(tick, 60);
-        } else {
-          charIdx--;
-          el.textContent = phrase.slice(0, charIdx);
-          if (charIdx === 0) {
-            deleting = false;
-            phraseIdx = (phraseIdx + 1) % phrases.length;
-            setTimeout(tick, 200);
-            return;
-          }
-          setTimeout(tick, 30);
-        }
+      function rand(min, max) { return min + Math.random() * (max - min); }
+
+      // Each particle orbits loosely around the glow center
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const angle  = rand(0, Math.PI * 2);
+        const orbit  = rand(120, 380);   // distance from center
+        const speed  = rand(0.04, 0.14); // orbit angular speed (rad/s)
+        const drift  = rand(-0.18, 0.18); // slow radial drift
+        const radius = rand(0.8, 2.2);   // dot size
+        const sparkleOffset = rand(0, Math.PI * 2); // phase offset for sparkle
+        const sparkleSpeed  = rand(1.2, 3.5);       // sparkle frequency (Hz)
+        // Color: mostly white, ~30% blue-tinted
+        const blue = Math.random() < 0.3;
+        particles.push({ angle, orbit, speed, drift, radius, sparkleOffset, sparkleSpeed, blue });
       }
 
-      tick();
+      function drawFrame(ts) {
+        if (!start) start = ts;
+        const elapsed = (ts - start) / 1000;
+
+        const cx = canvas.width  / 2;
+        const cy = canvas.height / 2;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // ── Outer glow — 6s cycle ──
+        const alphaOuter = 0.05 + (Math.sin(elapsed * (Math.PI * 2 / 6)) * 0.5 + 0.5) * (0.28 - 0.05);
+        const outerGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 350);
+        outerGrad.addColorStop(0, `rgba(30,60,90,${alphaOuter})`);
+        outerGrad.addColorStop(1, 'rgba(30,60,90,0)');
+        ctx.fillStyle = outerGrad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // ── Inner glow — 4s cycle, 1s offset ──
+        const alphaInner = 0.08 + (Math.sin((elapsed - 1) * (Math.PI * 2 / 4)) * 0.5 + 0.5) * (0.38 - 0.08);
+        const innerGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 180);
+        innerGrad.addColorStop(0, `rgba(43,80,110,${alphaInner})`);
+        innerGrad.addColorStop(1, 'rgba(43,80,110,0)');
+        ctx.fillStyle = innerGrad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // ── Particles ──
+        for (const p of particles) {
+          // Advance angle and gently drift orbit radius
+          p.angle += p.speed * (1 / 60);
+          p.orbit += p.drift * (1 / 60);
+          // Softly clamp orbit so particles stay in the glow zone
+          if (p.orbit < 90)  { p.orbit = 90;  p.drift =  Math.abs(p.drift); }
+          if (p.orbit > 400) { p.orbit = 400; p.drift = -Math.abs(p.drift); }
+
+          const x = cx + Math.cos(p.angle) * p.orbit;
+          const y = cy + Math.sin(p.angle) * p.orbit;
+
+          // Sparkle: opacity pulses between dim and bright
+          const sparkle = Math.sin(elapsed * p.sparkleSpeed * Math.PI * 2 + p.sparkleOffset);
+          const alpha = 0.06 + (sparkle * 0.5 + 0.5) * 0.28; // 0.06 → 0.34
+
+          // Occasional bright spike — makes it feel like it's twinkling
+          const spike = alpha > 0.28 ? p.radius * 1.5 : p.radius;
+
+          if (p.blue) {
+            ctx.fillStyle = `rgba(100,180,255,${alpha * 0.85})`;
+          } else {
+            ctx.fillStyle = `rgba(220,235,255,${alpha})`;
+          }
+
+          ctx.beginPath();
+          ctx.arc(x, y, spike, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Soft halo on brighter particles
+          if (alpha > 0.22) {
+            const haloA = (alpha - 0.22) * 0.12;
+            const color = p.blue ? `rgba(100,180,255,${haloA})` : `rgba(200,225,255,${haloA})`;
+            const halo = ctx.createRadialGradient(x, y, 0, x, y, spike * 4);
+            halo.addColorStop(0, color);
+            halo.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = halo;
+            ctx.beginPath();
+            ctx.arc(x, y, spike * 4, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        requestAnimationFrame(drawFrame);
+      }
+
+      requestAnimationFrame(drawFrame);
     })();
 
-    // ===== Frosted nav on scroll =====
-    const nav = document.getElementById('mainNav');
+    // ===== Typewriter =====
+    const LINE1 = 'Good design doesn\u2019t simplify complexity.';
+    const LINE2 = 'It makes complexity navigable.';
+    const LINE3 = 'So who\u2019s designing for the systems that matter most?';
 
-    window.addEventListener('scroll', () => {
-      nav.classList.toggle('scrolled', window.scrollY > 36);
-    }, { passive: true });
+    const el1 = document.getElementById('line1');
+    const el2 = document.getElementById('line2');
+    const el3 = document.getElementById('line3');
+    const cta = document.getElementById('cta');
 
-    // Init on load
-    nav.classList.toggle('scrolled', window.scrollY > 36);
+    const cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    cursor.setAttribute('aria-hidden', 'true');
 
-
-    // ===== Mobile hamburger =====
-    const hamburger = document.getElementById('hamburger');
-    const drawer    = document.getElementById('mobileDrawer');
-
-    hamburger.addEventListener('click', () => {
-      const isOpen = drawer.classList.toggle('open');
-      hamburger.setAttribute('aria-expanded', isOpen);
-      hamburger.setAttribute('aria-label', isOpen ? 'Close menu' : 'Open menu');
-    });
-
-    // Close drawer on any link click
-    drawer.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        drawer.classList.remove('open');
-        hamburger.setAttribute('aria-expanded', 'false');
-        hamburger.setAttribute('aria-label', 'Open menu');
-      });
-    });
-
-
-    // ===== Scroll-triggered fade-ins (IntersectionObserver) =====
-    const fadeEls = document.querySelectorAll('.fade-in');
-
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          observer.unobserve(entry.target);
-        }
-      });
-    }, {
-      threshold: 0.1,
-      rootMargin: '0px 0px -32px 0px'
-    });
-
-    fadeEls.forEach(el => observer.observe(el));
-
-
-    // ===== Smooth scroll (nav height offset) =====
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function (e) {
-        const id = this.getAttribute('href');
-        if (id === '#') return;
-        const target = document.querySelector(id);
-        if (!target) return;
-        e.preventDefault();
-        const offset = nav.offsetHeight + 12;
-        const top = target.getBoundingClientRect().top + window.scrollY - offset;
-        window.scrollTo({ top, behavior: 'smooth' });
-      });
-    });
-
-    // ===== Hero visual parallax =====
-    const heroVisual = document.querySelector('.hero-visual');
-    if (heroVisual) {
-      const chips = heroVisual.querySelectorAll('.ui-chip');
-      document.addEventListener('mousemove', (e) => {
-        const rect = heroVisual.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2;
-        const cy = rect.top + rect.height / 2;
-        const dx = (e.clientX - cx) / cx;
-        const dy = (e.clientY - cy) / cy;
-        chips.forEach((chip, i) => {
-          const depth = 0.4 + (i % 3) * 0.25;
-          const x = dx * 10 * depth;
-          const y = dy * 8 * depth;
-          chip.style.setProperty('--px', `${x}px`);
-          chip.style.setProperty('--py', `${y}px`);
-        });
+    function typeText(el, text, speed) {
+      return new Promise(resolve => {
+        el.appendChild(cursor);
+        let i = 0;
+        const tick = () => {
+          if (i < text.length) {
+            el.insertBefore(document.createTextNode(text[i]), cursor);
+            i++;
+            setTimeout(tick, speed);
+          } else {
+            resolve();
+          }
+        };
+        tick();
       });
     }
 
+    function pause(ms) {
+      return new Promise(r => setTimeout(r, ms));
+    }
+
+    function navigate() {
+      sessionStorage.setItem('introSeen', 'true');
+      document.getElementById('entry-page').classList.add('fade-out');
+      setTimeout(() => { window.location.href = 'home.html'; }, 620);
+    }
+
+    document.getElementById('btn-work').addEventListener('click', e => {
+      e.preventDefault();
+      navigate();
+    });
+
+    (async () => {
+      await pause(300);
+      await typeText(el1, LINE1, 38);
+      await pause(600);
+      cursor.remove();
+      el2.appendChild(cursor);
+      await typeText(el2, LINE2, 38);
+      await pause(600);
+      cursor.remove();
+      el3.appendChild(cursor);
+      await typeText(el3, LINE3, 28);
+      await pause(800);
+      cursor.remove();
+
+      cta.removeAttribute('aria-hidden');
+      cta.classList.add('visible');
+    })();
   </script>
 
 </body>
